@@ -2,11 +2,15 @@ let currentSlide = 0;
 const slides = [showTopStudents, showGenderPassRatio, showEthnicityGroups, showTestPreparationStatus];
 
 function updateSlide() {
-  // Clear the current content
-  d3.select('#visualization-container').html('');
+  // Clear the previous content
+  d3.select('#visualization-container').selectAll('*').remove();
   
   // Show the current slide
   slides[currentSlide]();
+
+  // Update button states
+  document.getElementById('prev-slide').disabled = (currentSlide === 0);
+  document.getElementById('next-slide').disabled = (currentSlide === slides.length - 1);
 }
 
 function showTopStudents() {
@@ -19,14 +23,17 @@ function showTopStudents() {
 
     let topN = 10;
 
-    d3.select('#visualization-container').append('input')
-      .attr('type', 'number')
-      .attr('id', 'topNInput')
-      .attr('value', topN)
-      .on('change', function() {
-        topN = +this.value;
-        updateChart();
-      });
+    const input = d3.select('#visualization-container').selectAll('input');
+    if (input.empty()) {
+      d3.select('#visualization-container').append('input')
+        .attr('type', 'number')
+        .attr('id', 'topNInput')
+        .attr('value', 10)
+        .on('change', function() {
+          topN = +this.value;
+          updateChart();
+        });
+    }
 
     function updateChart() {
       let topStudents = data.slice(0, topN);
@@ -46,17 +53,38 @@ function showTopStudents() {
         .domain([0, d3.max(topStudents, d => d.avg_score)])
         .nice()
         .range([400, 0]);
+      
+      const color = d3.scaleOrdinal(d3.schemeCategory10);
 
+      svg.append('text')
+        .attr('x', 400)
+        .attr('y', -10)
+        .attr('text-anchor', 'middle')
+        .style('font-size', '16px')
+        .style('font-weight', 'bold')
+        .text('Top Students by Average Score');
+      
       svg.append('g')
         .attr('transform', 'translate(0,400)')
-        .call(d3.axisBottom(x).tickFormat(i => i + 1));
+        .call(d3.axisBottom(x).tickFormat(i => i + 1))
+        .append('text')
+        .attr('x', 400)
+        .attr('y', 30)
+        .attr('text-anchor', 'middle')
+        .text('Rank');
 
       svg.append('g')
-        .call(d3.axisLeft(y));
+        .call(d3.axisLeft(y))
+        .append('text')
+        .attr('x', -40)
+        .attr('y', -10)
+        .attr('text-anchor', 'middle')
+        .text('Average Score');
 
       svg.selectAll('.bar')
         .data(topStudents)
         .enter().append('rect')
+        .attr('fill', (d, i) => color(i))
         .attr('class', 'bar')
         .attr('x', (d, i) => x(i))
         .attr('y', d => y(d.avg_score))
@@ -77,9 +105,10 @@ function showTopStudents() {
         .on('mouseout', function() {
           d3.select('.tooltip').remove();
         });
-    }
 
-    updateChart();
+      // Initially update the chart
+      updateChart();
+    }
   });
 }
 
@@ -120,6 +149,14 @@ function showGenderPassRatio() {
       .enter().append('g')
       .attr('class', 'arc');
 
+    svg.append('text')
+      .attr('x', 0)
+      .attr('y', -height / 2 + 20)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '16px')
+      .style('font-weight', 'bold')
+      .text('Gender Pass Ratio');
+    
     arcs.append('path')
       .attr('d', arc)
       .attr('fill', d => color(d.data.gender));
@@ -160,7 +197,15 @@ function showEthnicityGroups() {
 
     svg.append('g')
       .call(d3.axisLeft(y));
-
+    
+    svg.append('text')
+      .attr('x', 400)
+      .attr('y', -10)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '16px')
+      .style('font-weight', 'bold')
+      .text('Student Distribution by Ethnicity');
+    
     svg.selectAll('.bar')
       .data(barData)
       .enter().append('rect')
@@ -168,7 +213,8 @@ function showEthnicityGroups() {
       .attr('x', d => x(d.ethnicity))
       .attr('y', d => y(d.count))
       .attr('width', x.bandwidth())
-      .attr('height', d => 400 - y(d.count));
+      .attr('height', d => 400 - y(d.count))
+      .attr('fill', (d, i) => d3.schemeCategory10[i % 10]);
   });
 }
 
@@ -187,7 +233,8 @@ function showTestPreparationStatus() {
 
     const x = d3.scalePoint()
       .domain(lineData.map(d => d.status))
-      .range([0, 800]);
+      .range([0, 800])
+      .padding(0.5);
 
     const y = d3.scaleLinear()
       .domain([0, d3.max(lineData, d => d.count)])
@@ -196,15 +243,25 @@ function showTestPreparationStatus() {
 
     svg.append('g')
       .attr('transform', 'translate(0,400)')
-      .call(d3.axisBottom(x));
+      .call(d3.axisBottom(x))
+      .append('text')
+      .attr('x', 400)
+      .attr('y', 30)
+      .attr('text-anchor', 'middle')
+      .text('Test Preparation Course Status');
 
     svg.append('g')
-      .call(d3.axisLeft(y));
+      .call(d3.axisLeft(y))
+      .append('text')
+      .attr('x', -40)
+      .attr('y', -10)
+      .attr('text-anchor', 'middle')
+      .text('Number of Students');
 
     const line = d3.line()
       .x(d => x(d.status))
       .y(d => y(d.count));
-
+   
     svg.append('path')
       .datum(lineData)
       .attr('fill', 'none')
