@@ -238,3 +238,8 @@ document.getElementById('next-slide').addEventListener('click', () => {
     currentSlide = (currentSlide < slides.length - 1) ? currentSlide + 1 : 0;
     updateSlide();
 });
+function updateSlide() {
+  d3.select('#visualization-container').selectAll('svg').remove(); // Clear existing content
+  slides[currentSlide](); // Call the function for the current slide
+}
+showTopStudents();
