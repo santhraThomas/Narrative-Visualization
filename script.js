@@ -23,14 +23,13 @@ function showTopStudents() {
 
     let topN = 10;
 
+    // Check if the input field exists
     const input = d3.select('#visualization-container').selectAll('input');
     if (input.empty()) {
       d3.select('#visualization-container').append('input')
         .attr('type', 'number')
         .attr('id', 'topNInput')
         .attr('value', 10)
-        .attr('min', 1)
-        .attr('max', data.length)
         .on('change', function() {
           topN = +this.value;
           updateChart();
@@ -60,7 +59,7 @@ function showTopStudents() {
 
       svg.append('text')
         .attr('x', 400)
-        .attr('y', -10)
+        .attr('y', 20)
         .attr('text-anchor', 'middle')
         .style('font-size', '16px')
         .style('font-weight', 'bold')
@@ -129,7 +128,9 @@ function showGenderPassRatio() {
 
     const width = 400, height = 400, radius = Math.min(width, height) / 2;
 
-    const color = d3.scaleOrdinal(d3.schemeCategory10);
+    const color = d3.scaleOrdinal()
+      .domain(['female', 'male'])
+      .range(d3.schemeCategory10);
 
     const arc = d3.arc()
       .innerRadius(0)
@@ -140,23 +141,24 @@ function showGenderPassRatio() {
 
     const svg = d3.select('#visualization-container').append('svg')
       .attr('width', width)
-      .attr('height', height)
-      .append('g')
-      .attr('transform', `translate(${width / 2}, ${height / 2})`);
-
-    const arcs = svg.selectAll('.arc')
-      .data(pie(pieData))
-      .enter().append('g')
-      .attr('class', 'arc');
+      .attr('height', height);
 
     svg.append('text')
-      .attr('x', 0)
-      .attr('y', -height / 2 + 20)
+      .attr('x', width / 2)
+      .attr('y', 20)
       .attr('text-anchor', 'middle')
       .style('font-size', '16px')
       .style('font-weight', 'bold')
       .text('Gender Pass Ratio');
-    
+
+    const g = svg.append('g')
+      .attr('transform', `translate(${width / 2}, ${height / 2})`);
+
+    const arcs = g.selectAll('.arc')
+      .data(pie(pieData))
+      .enter().append('g')
+      .attr('class', 'arc');
+
     arcs.append('path')
       .attr('d', arc)
       .attr('fill', d => color(d.data.gender));
@@ -164,7 +166,6 @@ function showGenderPassRatio() {
     arcs.append('text')
       .attr('transform', d => `translate(${arc.centroid(d)})`)
       .attr('dy', '0.35em')
-      .style('text-anchor', 'middle')
       .text(d => `${d.data.gender}: ${d.data.count}`);
   });
 }
@@ -194,7 +195,7 @@ function showEthnicityGroups() {
 
     svg.append('text')
       .attr('x', 400)
-      .attr('y', -10)
+      .attr('y', 20)
       .attr('text-anchor', 'middle')
       .style('font-size', '16px')
       .style('font-weight', 'bold')
@@ -229,19 +230,24 @@ function showEthnicityGroups() {
   });
 }
 
+
 function showTestPreparationStatus() {
   d3.csv('StudentsPerformance.csv').then(data => {
+    // Count the number of students in each test preparation status
     const prepCounts = d3.rollups(data, v => v.length, d => d['test preparation course']);
 
+    // Prepare the data for the line chart
     const lineData = prepCounts.map(([status, count]) => ({
       status,
       count
     }));
 
+    // Create the SVG container
     const svg = d3.select('#visualization-container').append('svg')
       .attr('width', 800)
       .attr('height', 400);
 
+    // Define scales
     const x = d3.scalePoint()
       .domain(lineData.map(d => d.status))
       .range([0, 800])
@@ -252,14 +258,7 @@ function showTestPreparationStatus() {
       .nice()
       .range([400, 0]);
 
-    svg.append('text')
-      .attr('x', 400)
-      .attr('y', -10)
-      .attr('text-anchor', 'middle')
-      .style('font-size', '16px')
-      .style('font-weight', 'bold')
-      .text('Test Preparation Course Status');
-
+    // Add x-axis with label
     svg.append('g')
       .attr('transform', 'translate(0,400)')
       .call(d3.axisBottom(x))
@@ -267,8 +266,9 @@ function showTestPreparationStatus() {
       .attr('x', 400)
       .attr('y', 30)
       .attr('text-anchor', 'middle')
-      .text('Test Preparation Status');
+      .text('Test Preparation Course Status');
 
+    // Add y-axis with label
     svg.append('g')
       .call(d3.axisLeft(y))
       .append('text')
@@ -277,10 +277,12 @@ function showTestPreparationStatus() {
       .attr('text-anchor', 'middle')
       .text('Number of Students');
 
+    // Define the line generator
     const line = d3.line()
       .x(d => x(d.status))
       .y(d => y(d.count));
 
+    // Add the line path to the SVG
     svg.append('path')
       .datum(lineData)
       .attr('fill', 'none')
@@ -288,7 +290,7 @@ function showTestPreparationStatus() {
       .attr('stroke-width', 2)
       .attr('d', line);
 
-    // Add circles at data points
+    // Optional: Add circles at data points
     svg.selectAll('circle')
       .data(lineData)
       .enter().append('circle')
@@ -298,6 +300,7 @@ function showTestPreparationStatus() {
       .attr('fill', 'steelblue');
   });
 }
+
 
 document.getElementById('prev-slide').addEventListener('click', () => {
   currentSlide = (currentSlide > 0) ? currentSlide - 1 : slides.length - 1;
