@@ -29,6 +29,8 @@ function showTopStudents() {
         .attr('type', 'number')
         .attr('id', 'topNInput')
         .attr('value', 10)
+        .attr('min', 1)
+        .attr('max', data.length)
         .on('change', function() {
           topN = +this.value;
           updateChart();
@@ -53,7 +55,7 @@ function showTopStudents() {
         .domain([0, d3.max(topStudents, d => d.avg_score)])
         .nice()
         .range([400, 0]);
-      
+
       const color = d3.scaleOrdinal(d3.schemeCategory10);
 
       svg.append('text')
@@ -63,7 +65,7 @@ function showTopStudents() {
         .style('font-size', '16px')
         .style('font-weight', 'bold')
         .text('Top Students by Average Score');
-      
+
       svg.append('g')
         .attr('transform', 'translate(0,400)')
         .call(d3.axisBottom(x).tickFormat(i => i + 1))
@@ -127,9 +129,7 @@ function showGenderPassRatio() {
 
     const width = 400, height = 400, radius = Math.min(width, height) / 2;
 
-    const color = d3.scaleOrdinal()
-      .domain(['female', 'male'])
-      .range(d3.schemeCategory10);
+    const color = d3.scaleOrdinal(d3.schemeCategory10);
 
     const arc = d3.arc()
       .innerRadius(0)
@@ -164,6 +164,7 @@ function showGenderPassRatio() {
     arcs.append('text')
       .attr('transform', d => `translate(${arc.centroid(d)})`)
       .attr('dy', '0.35em')
+      .style('text-anchor', 'middle')
       .text(d => `${d.data.gender}: ${d.data.count}`);
   });
 }
@@ -191,13 +192,6 @@ function showEthnicityGroups() {
       .nice()
       .range([400, 0]);
 
-    svg.append('g')
-      .attr('transform', 'translate(0,400)')
-      .call(d3.axisBottom(x));
-
-    svg.append('g')
-      .call(d3.axisLeft(y));
-    
     svg.append('text')
       .attr('x', 400)
       .attr('y', -10)
@@ -205,7 +199,24 @@ function showEthnicityGroups() {
       .style('font-size', '16px')
       .style('font-weight', 'bold')
       .text('Student Distribution by Ethnicity');
-    
+
+    svg.append('g')
+      .attr('transform', 'translate(0,400)')
+      .call(d3.axisBottom(x))
+      .append('text')
+      .attr('x', 400)
+      .attr('y', 30)
+      .attr('text-anchor', 'middle')
+      .text('Ethnicity');
+
+    svg.append('g')
+      .call(d3.axisLeft(y))
+      .append('text')
+      .attr('x', -40)
+      .attr('y', -10)
+      .attr('text-anchor', 'middle')
+      .text('Number of Students');
+
     svg.selectAll('.bar')
       .data(barData)
       .enter().append('rect')
@@ -241,6 +252,14 @@ function showTestPreparationStatus() {
       .nice()
       .range([400, 0]);
 
+    svg.append('text')
+      .attr('x', 400)
+      .attr('y', -10)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '16px')
+      .style('font-weight', 'bold')
+      .text('Test Preparation Course Status');
+
     svg.append('g')
       .attr('transform', 'translate(0,400)')
       .call(d3.axisBottom(x))
@@ -248,7 +267,7 @@ function showTestPreparationStatus() {
       .attr('x', 400)
       .attr('y', 30)
       .attr('text-anchor', 'middle')
-      .text('Test Preparation Course Status');
+      .text('Test Preparation Status');
 
     svg.append('g')
       .call(d3.axisLeft(y))
@@ -261,13 +280,22 @@ function showTestPreparationStatus() {
     const line = d3.line()
       .x(d => x(d.status))
       .y(d => y(d.count));
-   
+
     svg.append('path')
       .datum(lineData)
       .attr('fill', 'none')
       .attr('stroke', 'steelblue')
       .attr('stroke-width', 2)
       .attr('d', line);
+
+    // Add circles at data points
+    svg.selectAll('circle')
+      .data(lineData)
+      .enter().append('circle')
+      .attr('cx', d => x(d.status))
+      .attr('cy', d => y(d.count))
+      .attr('r', 5)
+      .attr('fill', 'steelblue');
   });
 }
 
