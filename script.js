@@ -4,13 +4,13 @@ const slides = [showTopStudents, showGenderPassRatio, showEthnicityGroups, showT
 function updateSlide() {
   // Clear the previous content
   d3.select('#visualization-container').selectAll('*').remove();
-  
+
   // Show the current slide
   slides[currentSlide]();
 
-  // Update button states
-  document.getElementById('prev-slide').disabled = (currentSlide === 0);
-  document.getElementById('next-slide').disabled = (currentSlide === slides.length - 1);
+  // Update button states based on current slide
+  document.getElementById('prev-slide').disabled = currentSlide === 0;
+  document.getElementById('next-slide').disabled = currentSlide === slides.length - 1;
 }
 
 function showTopStudents() {
@@ -57,6 +57,7 @@ function showTopStudents() {
 
       const color = d3.scaleOrdinal(d3.schemeCategory10);
 
+      // Add title for the chart
       svg.append('text')
         .attr('x', 400)
         .attr('y', 20)
@@ -65,6 +66,7 @@ function showTopStudents() {
         .style('font-weight', 'bold')
         .text('Top Students by Average Score');
 
+      // Add axis labels
       svg.append('g')
         .attr('transform', 'translate(0,400)')
         .call(d3.axisBottom(x).tickFormat(i => i + 1))
@@ -143,6 +145,7 @@ function showGenderPassRatio() {
       .attr('width', width)
       .attr('height', height);
 
+    // Add title outside the chart
     svg.append('text')
       .attr('x', width / 2)
       .attr('y', 20)
@@ -193,6 +196,7 @@ function showEthnicityGroups() {
       .nice()
       .range([400, 0]);
 
+    // Add title for the chart
     svg.append('text')
       .attr('x', 400)
       .attr('y', 20)
@@ -201,6 +205,7 @@ function showEthnicityGroups() {
       .style('font-weight', 'bold')
       .text('Student Distribution by Ethnicity');
 
+    // Add axis labels
     svg.append('g')
       .attr('transform', 'translate(0,400)')
       .call(d3.axisBottom(x))
@@ -229,7 +234,6 @@ function showEthnicityGroups() {
       .attr('fill', (d, i) => d3.schemeCategory10[i % 10]);
   });
 }
-
 
 function showTestPreparationStatus() {
   d3.csv('StudentsPerformance.csv').then(data => {
@@ -300,7 +304,6 @@ function showTestPreparationStatus() {
       .attr('fill', 'steelblue');
   });
 }
-
 
 document.getElementById('prev-slide').addEventListener('click', () => {
   currentSlide = (currentSlide > 0) ? currentSlide - 1 : slides.length - 1;
