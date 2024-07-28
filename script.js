@@ -5,6 +5,7 @@ function showTopStudents() {
     // Load data and create bar chart with top students
     d3.csv('StudentsPerformance.csv').then(data => {
         // Calculate average score for each student
+        console.log("Top Students data:", data);
         data.forEach(d => {
             d.avg_score = (+d['math score'] + +d['reading score'] + +d['writing score']) / 3;
         });
@@ -85,9 +86,10 @@ function showTopStudents() {
         }
 
         updateChart(); // Initial chart rendering
-    });
+    .catch(error => {
+    console.error("Error loading data:", error);
+  });
 }
-
 function showGenderPassRatio() {
     // Load data and create pie chart with male/female pass ratio
     d3.csv('StudentsPerformance.csv').then(data => {
