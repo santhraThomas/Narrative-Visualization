@@ -26,23 +26,23 @@ function updateSlide(slideNumber) {
     switch (slideNumber) {
         case 1:
             // Slide 1: Title Slide with Image
-            container.html(`
+            container.html(
                 <h1>Student's Performance Analysis By Santhra Thomas</h1>
                 <img src="img1.jpg" alt="Student Performance Image" />
-            `);
+            );
             d3.select('#prev-slide').style('display', 'none');
             d3.select('#next-slide').style('display', 'block');
             break;
         case 2:
             // Slide 2: Top Student Performances
-            container.html(`
-                <h1>Top Student Performance</h1>
+            container.html(
+                <h1>Top Student Performances</h1>
                 <div id="bar-chart"></div>
-                <div id="input-container">
-                    <input type="text" id="top-number" placeholder="Update the Top number">
-                    <button onclick="updateTopNumber()">Update</button>
+                <div id="controls">
+                    <input type="number" id="top-n" placeholder="Update the Top number" style="font-size: 16px; padding: 5px;" />
+                    <button id="update-chart" style="font-size: 16px; padding: 30px;">Update</button>
                 </div>
-            `);
+            );
             drawBarChart(studentData);
 
             d3.select('#prev-slide').style('display', 'block');
@@ -56,11 +56,11 @@ function updateSlide(slideNumber) {
             break;
         case 3:
             // Slide 3: Male/Female Pass Ratio and Top Performers
-            container.html(`
+            container.html(
                 <h1>Male/Female Pass Ratio</h1>
                 <div id="pie-chart"></div>
                 <div id="details-table"></div>
-            `);
+            );
             drawPieChart(studentData);
             drawTopPerformersTable(studentData);
             
@@ -68,21 +68,38 @@ function updateSlide(slideNumber) {
             d3.select('#next-slide').style('display', 'block');
             break;
         case 4:
-        container.html(`
-            <h1>Race/Ethnicity Specific Admission</h1>
-            <div id="bubble-chart"></div>
-        `);
-        drawBubbleChart(studentData);
-    
-        d3.select('#prev-slide').style('display', 'block');
-        d3.select('#next-slide').style('display', 'none');
-        break;
+            // Slide 4: Race/Ethnicity of Students
+            container.html(
+                <h1>Race/Ethnicity of Students</h1>
+                <div id="bar-chart"></div>
+                <div id="group-select">
+                    <label for="group">Select Group:</label>
+                    <select id="group" style="font-size: 16px; padding: 5px;">
+                        <option value="Group A">Group A</option>
+                        <option value="Group B">Group B</option>
+                        <option value="Group C">Group C</option>
+                        <option value="Group D">Group D</option>
+                        <option value="Group E">Group E</option>
+                    </select>
+                </div>
+            );
+
+            document.getElementById('group').addEventListener('change', function() {
+                const selectedGroup = document.getElementById('group').value;
+                drawGroupTotalScores(studentData, selectedGroup);
+            });
+
+            d3.select('#prev-slide').style('display', 'block');
+            d3.select('#next-slide').style('display', 'none');
+
+            drawGroupTotalScores(studentData, 'Group A');
+            break;
     }
 }
 
 function drawBarChart(data, topN = 10) {
     const svgWidth = 800;
-    const svgHeight = 400; // Increased height for better space utilization
+    const svgHeight = 600; // Increased height for better space utilization
     const margin = { top: 20, right: 20, bottom: 70, left: 60 }; // Adjusted margins for labels
     const width = svgWidth - margin.left - margin.right;
     const height = svgHeight - margin.top - margin.bottom;
@@ -94,7 +111,7 @@ function drawBarChart(data, topN = 10) {
         .attr('width', svgWidth)
         .attr('height', svgHeight)
         .append('g')
-        .attr('transform', `translate(${margin.left},${margin.top})`);
+        .attr('transform', translate(${margin.left},${margin.top}));
 
     // Process data
     const processedData = data.map((d, index) => ({
@@ -127,16 +144,16 @@ function drawBarChart(data, topN = 10) {
             d3.select(this).style('fill', 'red'); // Color on hover
             d3.select('#tooltip')
                 .style('opacity', 1)
-                .html(`
+                .html(
                     <strong>Student ID:</strong> ${d.details['student id']}<br>
                     <strong>Gender:</strong> ${d.details.gender}<br>
                     <strong>Race/Ethnicity:</strong> ${d.details['race/ethnicity']}<br>
                     <strong>Math Score:</strong> ${d.details['math score']}<br>
                     <strong>Reading Score:</strong> ${d.details['reading score']}<br>
                     <strong>Writing Score:</strong> ${d.details['writing score']}
-                `)
-                .style('left', `${event.pageX + 5}px`)
-                .style('top', `${event.pageY - 28}px`);
+                )
+                .style('left', ${event.pageX + 5}px)
+                .style('top', ${event.pageY - 28}px);
         })
         .on('mouseout', function() {
             d3.select(this).style('fill', 'darkblue'); // Default color on mouse out
@@ -145,8 +162,8 @@ function drawBarChart(data, topN = 10) {
 
     svg.append('g')
         .attr('class', 'x-axis')
-        .attr('transform', `translate(0,${height})`)
-        .call(d3.axisBottom(x).tickFormat(d => `#${d}`))
+        .attr('transform', translate(0,${height}))
+        .call(d3.axisBottom(x).tickFormat(d => #${d}))
         .append('text')
         .attr('class', 'axis-label')
         .attr('x', width / 2)
@@ -180,7 +197,7 @@ function drawPieChart(data) {
         .attr('width', svgWidth)
         .attr('height', svgHeight)
         .append('g')
-        .attr('transform', `translate(${svgWidth / 2},${svgHeight / 2})`);
+        .attr('transform', translate(${svgWidth / 2},${svgHeight / 2}));
 
     // Process data
     const passCounts = d3.rollups(data, v => v.length, d => d.gender === 'male' ? 'Male' : 'Female')
@@ -209,10 +226,9 @@ function drawPieChart(data) {
         });
 
     g.append('text')
-        .attr('transform', d => `translate(${labelArc.centroid(d)})`)
+        .attr('transform', d => translate(${labelArc.centroid(d)}))
         .attr('dy', '.35em')
-        .attr('text-anchor', 'middle') // Center the text
-        .text(d => `${d.data.gender}: ${d.data.count}`);
+        .text(d => ${d.data.gender}: ${d.data.count});
 
     // Initialize the table with top 3 male and top 3 female students
     drawTopPerformersTable(data);
@@ -285,81 +301,79 @@ function updateTopPerformersTable(data, gender) {
     });
 }
 
-function drawBubbleChart(data) {
-    const svgWidth = 500;
-    const svgHeight = 400;
-
-    // Define the dimensions and margins of the graph
-    const margin = {top: 20, right: 20, bottom: 30, left: 40};
+function drawGroupTotalScores(data, selectedGroup) {
+    const svgWidth = 800;
+    const svgHeight = 600;
+    const margin = { top: 20, right: 20, bottom: 70, left: 60 };
     const width = svgWidth - margin.left - margin.right;
     const height = svgHeight - margin.top - margin.bottom;
 
-    // Append the svg object to the body of the page
-    const svg = d3.select('#visualization-container').append('svg')
+    // Clear existing chart
+    d3.select('#ethnicity-chart').html('');
+
+    const svg = d3.select('#ethnicity-chart').append('svg')
         .attr('width', svgWidth)
         .attr('height', svgHeight)
         .append('g')
-        .attr('transform', `translate(${margin.left},${margin.top})`);
+        .attr('transform', translate(${margin.left},${margin.top}));
 
     // Process data
-    const groupData = d3.rollups(data, v => v.length, d => d['race/ethnicity'])
-        .map(([key, value]) => ({group: key, value: value}));
+    const groupData = data.filter(d => d['race/ethnicity'] === selectedGroup);
+    const totalScore = groupData.reduce((sum, d) => sum + ((parseFloat(d['math score']) + parseFloat(d['reading score']) + parseFloat(d['writing score'])) / 3), 0);
 
-    // Add X axis
-    const x = d3.scaleLinear()
-        .domain([0, d3.max(groupData, d => d.value)])
-        .range([0, width]);
+    const groupScores = [{ group: selectedGroup, totalScore }];
 
-    // Add Y axis
+    const x = d3.scaleBand()
+        .domain(groupScores.map(d => d.group))
+        .range([0, width])
+        .padding(0.1);
+
     const y = d3.scaleLinear()
-        .domain([0, d3.max(groupData, d => d.value)])
+        .domain([0, d3.max(groupScores, d => d.totalScore)])
+        .nice()
         .range([height, 0]);
 
-    // Add a scale for bubble size
-    const z = d3.scaleSqrt()
-        .domain([0, d3.max(groupData, d => d.value)])
-        .range([0, 40]);
+    // Define colors for each group
+    const colorMap = {
+        'Group A': 'blue',
+        'Group B': 'red',
+        'Group C': 'green',
+        'Group D': 'orange',
+        'Group E': 'purple'
+    };
 
-    // Add a scale for bubble color
-    const color = d3.scaleOrdinal(d3.schemeCategory10);
-
-    // Add bubbles
     svg.append('g')
-        .selectAll('dot')
-        .data(groupData)
-        .enter()
-        .append('circle')
-        .attr('class', 'bubble')
-        .attr('cx', d => x(d.value))
-        .attr('cy', d => y(d.value))
-        .attr('r', d => z(d.value))
-        .style('fill', d => color(d.group))
-        .on('mouseover', function(event, d) {
-            d3.select(this).style('opacity', 0.7);
-            d3.select('#tooltip')
-                .style('opacity', 1)
-                .html(`
-                    <strong>Group:</strong> ${d.group}<br>
-                    <strong>Value:</strong> ${d.value}
-                `)
-                .style('left', `${event.pageX + 5}px`)
-                .style('top', `${event.pageY - 28}px`);
-        })
-        .on('mouseout', function() {
-            d3.select(this).style('opacity', 1);
-            d3.select('#tooltip').style('opacity', 0);
-        });
+        .selectAll('.bar')
+        .data(groupScores)
+        .enter().append('rect')
+        .attr('class', 'bar')
+        .attr('x', d => x(d.group))
+        .attr('y', d => y(d.totalScore))
+        .attr('width', x.bandwidth())
+        .attr('height', d => height - y(d.totalScore))
+        .attr('fill', d => colorMap[d.group]);
 
-    // Add labels
-    svg.selectAll('text')
-        .data(groupData)
-        .enter()
+    svg.append('g')
+        .attr('class', 'x-axis')
+        .attr('transform', translate(0,${height}))
+        .call(d3.axisBottom(x).tickFormat(d => #${d}))
         .append('text')
-        .attr('x', d => x(d.value))
-        .attr('y', d => y(d.value))
-        .attr('dy', '0.35em')
-        .attr('text-anchor', 'middle')
-        .text(d => `${d.group} ${d.value}%`);
+        .attr('class', 'axis-label')
+        .attr('x', width / 2)
+        .attr('y', 50)
+        .attr('fill', 'black')
+        .text('Race/Ethnicity');
+
+    svg.append('g')
+        .attr('class', 'y-axis')
+        .call(d3.axisLeft(y))
+        .append('text')
+        .attr('class', 'axis-label')
+        .attr('x', -height / 2)
+        .attr('y', -50) 
+        .attr('transform', 'rotate(-90)')
+        .attr('fill', 'black')
+        .text('Total Student Scores');
 }
 
 // Change to the next slide
