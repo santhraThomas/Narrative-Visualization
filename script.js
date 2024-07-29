@@ -178,31 +178,44 @@ function drawPieChart(data) {
         .attr('height', svgHeight)
         .append('g')
         .attr('transform', `translate(${svgWidth / 2},${svgHeight / 2})`);
+
+    // Create a tooltip div and set its initial opacity to 0
+    const tooltip = d3.select('body').append('div')
+        .attr('class', 'tooltip')
+        .style('opacity', 0);
+
     // Process data
     const passCounts = d3.rollups(data, v => v.length, d => d.gender === 'male' ? 'Male' : 'Female')
         .map(([key, value]) => ({ gender: key, count: value }));
+    
     const pie = d3.pie().value(d => d.count)(passCounts);
     const arc = d3.arc().outerRadius(radius - 10).innerRadius(0);
     const labelArc = d3.arc().outerRadius(radius - 40).innerRadius(radius - 40);
-        const g = svg.selectAll('.arc')
+
+    const g = svg.selectAll('.arc')
         .data(pie)
         .enter().append('g')
-        .attr('class', 'arc')
-        .on('click', function(event, d) {
-            updateTopPerformersTable(data, d.data.gender);
-        });
+        .attr('class', 'arc');
 
     g.append('path')
         .attr('d', arc)
-        .style('fill', d => color(d.data.gender));
+        .style('fill', d => color(d.data.gender))
+        .on('mouseover', function(event, d) {
+            d3.select(this).style('fill', 'orange');
+            tooltip.transition().duration(200).style('opacity', .9);
+            tooltip.html(`Gender: ${d.data.gender}<br>Count: ${d.data.count}`)
+                .style('left', `${event.pageX + 5}px`)
+                .style('top', `${event.pageY - 28}px`);
+        })
+        .on('mouseout', function() {
+            d3.select(this).style('fill', d => color(d.data.gender));
+            tooltip.transition().duration(500).style('opacity', 0);
+        });
 
-    g.append('text')
-        .attr('transform', d => `translate(${labelArc.centroid(d)})`)
-        .attr('dy', '.35em')
-        .text(d => `${d.data.gender}: ${d.data.count}`);
-    
-    // Initialize the table with top 3 male and top 3 female students
-    drawTopPerformersTable(data);
+    // Optionally, add an event listener to update the table on pie click
+    g.on('click', function(event, d) {
+        updateTopPerformersTable(data, d.data.gender);
+    });
 }
 
 // Draw the top performers table
