@@ -70,19 +70,19 @@ function updateSlide(slideNumber) {
         case 4:
             // Slide 4: Race/Ethnicity of Students
             container.html(`
-                <h1>Race/Ethnicity of Students</h1>
-                <div id="bar-chart"></div>
-                <div id="group-select">
-                    <label for="group">Select Group:</label>
-                    <select id="group" style="font-size: 16px; padding: 5px;">
-                        <option value="Group A">Group A</option>
-                        <option value="Group B">Group B</option>
-                        <option value="Group C">Group C</option>
-                        <option value="Group D">Group D</option>
-                        <option value="Group E">Group E</option>
-                    </select>
-                </div>
-            `);
+            <h1>Race/Ethnicity of Students</h1>
+            <div id="ethnicity-chart"></div>
+            <div id="group-select">
+                <label for="group">Select Group:</label>
+                <select id="group" style="font-size: 16px; padding: 5px;">
+                    <option value="Group A">Group A</option>
+                    <option value="Group B">Group B</option>
+                    <option value="Group C">Group C</option>
+                    <option value="Group D">Group D</option>
+                    <option value="Group E">Group E</option>
+                </select>
+            </div>
+        `);
 
             document.getElementById('group').addEventListener('change', function() {
                 const selectedGroup = document.getElementById('group').value;
@@ -357,7 +357,7 @@ function drawGroupTotalScores(data, selectedGroup) {
     svg.append('g')
         .attr('class', 'x-axis')
         .attr('transform', `translate(0,${height})`)
-        .call(d3.axisBottom(x).tickFormat(d => `#${d}`))
+        .call(d3.axisBottom(x))
         .append('text')
         .attr('class', 'axis-label')
         .attr('x', width / 2)
@@ -371,7 +371,7 @@ function drawGroupTotalScores(data, selectedGroup) {
         .append('text')
         .attr('class', 'axis-label')
         .attr('x', -height / 2)
-        .attr('y', -50) 
+        .attr('y', -50)
         .attr('transform', 'rotate(-90)')
         .attr('fill', 'black')
         .text('Total Student Scores');
