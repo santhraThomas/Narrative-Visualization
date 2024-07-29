@@ -93,6 +93,7 @@ function updateSlide(slideNumber) {
 }
 
 // Draw bar chart for Slide 2
+// Draw bar chart for Slide 2
 function drawBarChart(data, topN = 10) {
     const svgWidth = 800;
     const svgHeight = 400;
@@ -111,7 +112,7 @@ function drawBarChart(data, topN = 10) {
 
     // Process data
     const processedData = data.map((d, index) => ({
-        id: d['student id'], // Correctly access the student id
+        id: d['student id'], // Use the student id directly from CSV
         avgScore: (parseFloat(d['math score']) + parseFloat(d['reading score']) + parseFloat(d['writing score'])) / 3,
         details: d
     })).sort((a, b) => b.avgScore - a.avgScore).slice(0, topN);
