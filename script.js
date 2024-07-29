@@ -36,7 +36,7 @@ function updateSlide(slideNumber) {
         case 2:
             // Slide 2: Top Student Performances
             container.html(`
-                <h1>Top Student Performances</h1>
+                <h1>Top Student Performance</h1>
                 <div id="bar-chart"></div>
                 <div id="input-container">
                     <input type="text" id="top-number" placeholder="Update the Top number">
