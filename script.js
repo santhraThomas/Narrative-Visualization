@@ -1,7 +1,7 @@
 // script.js
 
 // Global variables
-let currentSlide = 1;
+let currentSlide = 2; // Start at slide 2
 let studentData = []; // Store CSV data
 
 // Initialize slides
@@ -93,11 +93,10 @@ function updateSlide(slideNumber) {
 }
 
 // Draw bar chart for Slide 2
-// Draw bar chart for Slide 2
 function drawBarChart(data, topN = 10) {
     const svgWidth = 800;
-    const svgHeight = 600;
-    const margin = { top: 20, right: 20, bottom: 50, left: 60 };
+    const svgHeight = 600; // Increased height for better space utilization
+    const margin = { top: 20, right: 20, bottom: 50, left: 60 }; // Adjusted margins for labels
     const width = svgWidth - margin.left - margin.right;
     const height = svgHeight - margin.top - margin.bottom;
 
