@@ -66,7 +66,7 @@ function updateSlide(slideNumber) {
         case 3:
             // Slide 3: Male/Female Pass Ratio
             container.html(`
-                <h1>Male/Female Pass Ratio</h1>
+                <h1>Male/Female Passes Ratio</h1>
                 <div id="pie-chart"></div>
                 <div id="details-table"></div>
             `);
