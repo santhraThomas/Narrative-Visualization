@@ -40,7 +40,7 @@ function updateSlide(slideNumber) {
                 <div id="bar-chart"></div>
                 <div id="controls">
                     <input type="number" id="top-n" placeholder="Update the Top number" style="font-size: 16px; padding: 5px;" />
-                    <button id="update-chart" style="font-size: 16px; padding: 5px;">Update</button>
+                    <button id="update-chart" style="font-size: 16px; padding: 30px;">Update</button>
                 </div>
             `);
             drawBarChart(studentData);
@@ -169,7 +169,8 @@ function drawBarChart(data, topN = 10) {
         .attr('x', width / 2)
         .attr('y', 50) // Adjusted position for label
         .attr('fill', 'black')
-        .text('Student Id');
+        .text('Student Id')
+        .style('font-size', '16px');
 
     svg.append('g')
         .attr('class', 'y-axis')
@@ -180,7 +181,8 @@ function drawBarChart(data, topN = 10) {
         .attr('y', -50) // Adjusted position for label
         .attr('transform', 'rotate(-90)')
         .attr('fill', 'black')
-        .text('Total Student Scores');
+        .text('Total Student Scores')
+        .style('font-size', '16px');
 }
 
 function drawPieChart(data) {
@@ -226,6 +228,7 @@ function drawPieChart(data) {
     g.append('text')
         .attr('transform', d => `translate(${labelArc.centroid(d)})`)
         .attr('dy', '.35em')
+        .attr('text-anchor', 'middle') // Center the text
         .text(d => `${d.data.gender}: ${d.data.count}`);
 
     // Initialize the table with top 3 male and top 3 female students
