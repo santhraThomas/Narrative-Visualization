@@ -44,7 +44,7 @@ function updateSlide(slideNumber) {
                 <h1>Top Student Performances</h1>
                 <div id="bar-chart"></div>
                 <div id="controls">
-                    <input type="number" id="top-n" placeholder="Enter number" />
+                    <input type="number" id="top-n" placeholder="Update the Top number" />
                     <button id="update-chart">Update</button>
                 </div>
             `);
@@ -66,7 +66,7 @@ function updateSlide(slideNumber) {
         case 3:
             // Slide 3: Male/Female Pass Ratio
             container.html(`
-                <h1>Male/Female Passes Ratio</h1>
+                <h1>Male/Female Pass Ratio</h1>
                 <div id="pie-chart"></div>
                 <div id="details-table"></div>
             `);
@@ -80,10 +80,29 @@ function updateSlide(slideNumber) {
             container.html(`
                 <h1>Race/Ethnicity of Students</h1>
                 <div id="ethnicity-chart"></div>
+                <div id="group-select">
+                    <label for="group">Select Group:</label>
+                    <select id="group">
+                        <option value="Group A">Group A</option>
+                        <option value="Group B">Group B</option>
+                        <option value="Group C">Group C</option>
+                        <option value="Group D">Group D</option>
+                        <option value="Group E">Group E</option>
+                    </select>
+                </div>
             `);
-            // Add bar chart drawing logic here
+
+            // Add event listener to the dropdown
+            document.getElementById('group').addEventListener('change', function() {
+                const selectedGroup = document.getElementById('group').value;
+                updateEthnicityChart(studentData, selectedGroup);
+            });
+
             d3.select('#prev-slide').style('display', 'block');
             d3.select('#next-slide').style('display', 'block');
+
+            // Initialize the chart with the default group
+            updateEthnicityChart(studentData, 'Group A');
             break;
         case 5:
             // Slide 5: Test Prep Course Effectiveness
