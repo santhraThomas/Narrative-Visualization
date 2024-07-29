@@ -1,9 +1,6 @@
 // script.js
 
 // Global variables
-// script.js
-
-// Global variables
 let currentSlide = 1; // Start at slide 2
 let studentData = []; // Store CSV data
 
@@ -64,24 +61,15 @@ function updateSlide(slideNumber) {
             });
             break;
         case 3:
-            // Slide 3: Male/Female Pass Ratio and Group Scores
+            // Slide 3: Male/Female Pass Ratio and Top Performers
             container.html(`
                 <h1>Male/Female Pass Ratio</h1>
                 <div id="pie-chart"></div>
-                <div id="bar-chart"></div>
                 <div id="details-table"></div>
-                
             `);
             drawPieChart(studentData);
             drawTopPerformersTable(studentData);
-            drawGroupTotalScores(studentData, 'Group A'); // Initialize with default group
-
-            // Add event listener to the dropdown
-            document.getElementById('group').addEventListener('change', function() {
-                const selectedGroup = document.getElementById('group').value;
-                drawGroupTotalScores(studentData, selectedGroup);
-            });
-
+            
             d3.select('#prev-slide').style('display', 'block');
             d3.select('#next-slide').style('display', 'block');
             break;
@@ -89,7 +77,7 @@ function updateSlide(slideNumber) {
             // Slide 4: Race/Ethnicity of Students
             container.html(`
                 <h1>Race/Ethnicity of Students</h1>
-                <div id="ethnicity-chart"></div>
+                <div id="bar-chart"></div>
                 <div id="group-select">
                     <label for="group">Select Group:</label>
                     <select id="group">
@@ -105,14 +93,14 @@ function updateSlide(slideNumber) {
             // Add event listener to the dropdown
             document.getElementById('group').addEventListener('change', function() {
                 const selectedGroup = document.getElementById('group').value;
-                updateEthnicityChart(studentData, selectedGroup);
+                drawGroupTotalScores(studentData, selectedGroup);
             });
 
             d3.select('#prev-slide').style('display', 'block');
             d3.select('#next-slide').style('display', 'block');
 
             // Initialize the chart with the default group
-            updateEthnicityChart(studentData, 'Group A');
+            drawGroupTotalScores(studentData, 'Group A');
             break;
         case 5:
             // Slide 5: Test Prep Course Effectiveness
@@ -322,7 +310,7 @@ function updateTopPerformersTable(data, gender) {
     });
 }
 
-// Draw bar graph for Slide 3 based on selected group and total scores
+// Draw bar graph for Slide 4 based on selected group and total scores
 function drawGroupTotalScores(data, selectedGroup) {
     const svgWidth = 800;
     const svgHeight = 600;
@@ -331,9 +319,9 @@ function drawGroupTotalScores(data, selectedGroup) {
     const height = svgHeight - margin.top - margin.bottom;
 
     // Clear existing chart
-    d3.select('#bar-chart').html('');
+    d3.select('#ethnicity-chart').html('');
 
-    const svg = d3.select('#bar-chart').append('svg')
+    const svg = d3.select('#ethnicity-chart').append('svg')
         .attr('width', svgWidth)
         .attr('height', svgHeight)
         .append('g')
