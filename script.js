@@ -124,8 +124,9 @@ function drawBarChart(data, topN = 10) {
         .attr('y', d => y(d.avgScore))
         .attr('width', x.bandwidth())
         .attr('height', d => height - y(d.avgScore))
+        .attr('fill', 'orange')
         .on('mouseover', function(event, d) {
-            d3.select(this).style('fill', 'orange');
+            d3.select(this).style('fill', 'green');
             d3.select('#tooltip')
                 .style('opacity', 1)
                 .html(`
@@ -140,7 +141,7 @@ function drawBarChart(data, topN = 10) {
                 .style('top', `${event.pageY - 28}px`);
         })
         .on('mouseout', function() {
-            d3.select(this).style('fill', 'steelblue');
+            d3.select(this).style('fill', 'orange');
             d3.select('#tooltip').style('opacity', 0);
         });
 
@@ -296,6 +297,7 @@ function drawGroupTotalScores(data, selectedGroup) {
         .domain(groupScores.map(d => d.group))
         .range([0, width])
         .padding(0.1);
+    
     const y = d3.scaleLinear()
         .domain([0, d3.max(groupScores, d => d.totalScore)])
         .nice()
@@ -329,7 +331,6 @@ function drawGroupTotalScores(data, selectedGroup = null) {
     const width = svgWidth - margin.left - margin.right;
     const height = svgHeight - margin.top - margin.bottom;
 
-    // Clear existing chart
     d3.select('#ethnicity-chart').html('');
     const svg = d3.select('#ethnicity-chart').append('svg')
         .attr('width', svgWidth)
@@ -354,7 +355,11 @@ function drawGroupTotalScores(data, selectedGroup = null) {
         .domain(groupCounts.map(d => d.group))
         .range([0, height])
         .padding(0.1);
-
+    
+    const colorScale = d3.scaleOrdinal()
+        .domain(ethnicityGroups)
+        .range(['blue', 'red', 'green', 'orange', 'purple']);
+    
     svg.append('g')
         .selectAll('.bar')
         .data(groupCounts)
@@ -364,11 +369,26 @@ function drawGroupTotalScores(data, selectedGroup = null) {
         .attr('y', d => y(d.group))
         .attr('width', d => x(d.count))
         .attr('height', y.bandwidth())
-        .attr('fill', 'steelblue')
+        .attr('fill', d => colorScale(d.group))
+        .on('mouseover', function(event, d) {
+            d3.select(this).style('fill', d3.color(colorScale(d.group)).brighter(0.3)); // Lighter shade on hover
+            d3.select('#tooltip')
+                .style('opacity', 1)
+                .html(`
+                    <strong>Group:</strong> ${d.group}<br>
+                    <strong>Number of Students:</strong> ${d.count}
+                `)
+                .style('left', `${event.pageX + 5}px`)
+                .style('top', `${event.pageY - 28}px`);
+        })
+        .on('mouseout', function(d) {
+            d3.select(this).style('fill', colorScale(d.group)); // Reset to original color
+            d3.select('#tooltip').style('opacity', 0);
+        })
         .on('click', function(event, d) {
             if (selectedGroup === null || selectedGroup !== d.group) {
                 updateTopStudentsTable(data, d.group);
-                drawGroupTotalScores(data, d.group); // Make sure to update the chart with the new group
+                drawGroupTotalScores(data, d.group); 
             }
         });
 
