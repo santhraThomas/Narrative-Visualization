@@ -70,16 +70,7 @@ function updateSlide(slideNumber) {
                 <div id="pie-chart"></div>
                 <div id="bar-chart"></div>
                 <div id="details-table"></div>
-                <div id="group-select">
-                    <label for="group">Select Group:</label>
-                    <select id="group">
-                        <option value="Group A">Group A</option>
-                        <option value="Group B">Group B</option>
-                        <option value="Group C">Group C</option>
-                        <option value="Group D">Group D</option>
-                        <option value="Group E">Group E</option>
-                    </select>
-                </div>
+                
             `);
             drawPieChart(studentData);
             drawTopPerformersTable(studentData);
