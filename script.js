@@ -324,7 +324,7 @@ function drawGroupTotalScores(data) {
         .attr('transform', `translate(${margin.left},${margin.top})`);
 
     // Process data
-    const ethnicityGroups = ['Group A', 'Group B', 'Group C', 'Group D', 'Group E'];
+    const ethnicityGroups = ['group A', 'group B', 'group C', 'group D', 'group E'];
     const groupCounts = ethnicityGroups.map(group => {
         const groupData = data.filter(d => d['race/ethnicity'] === group);
         const count = groupData.length;
