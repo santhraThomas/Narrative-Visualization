@@ -68,11 +68,15 @@ function updateSlide(slideNumber) {
             d3.select('#next-slide').style('display', 'block');
             break;
         case 4:
-            // Slide 4: Race/Ethnicity of Students
-
-            d3.select('#prev-slide').style('display', 'block');
-            d3.select('#next-slide').style('display', 'none');
-            break;
+        container.html(`
+            <h1>Race/Ethnicity Specific Admission</h1>
+            <div id="bubble-chart"></div>
+        `);
+        drawBubbleChart(studentData);
+    
+        d3.select('#prev-slide').style('display', 'block');
+        d3.select('#next-slide').style('display', 'none');
+        break;
     }
 }
 
@@ -279,6 +283,83 @@ function updateTopPerformersTable(data, gender) {
         row.append('td').text(d['reading score']);
         row.append('td').text(d['writing score']);
     });
+}
+
+function drawBubbleChart(data) {
+    const svgWidth = 500;
+    const svgHeight = 400;
+
+    // Define the dimensions and margins of the graph
+    const margin = {top: 20, right: 20, bottom: 30, left: 40};
+    const width = svgWidth - margin.left - margin.right;
+    const height = svgHeight - margin.top - margin.bottom;
+
+    // Append the svg object to the body of the page
+    const svg = d3.select('#visualization-container').append('svg')
+        .attr('width', svgWidth)
+        .attr('height', svgHeight)
+        .append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+
+    // Process data
+    const groupData = d3.rollups(data, v => v.length, d => d['race/ethnicity'])
+        .map(([key, value]) => ({group: key, value: value}));
+
+    // Add X axis
+    const x = d3.scaleLinear()
+        .domain([0, d3.max(groupData, d => d.value)])
+        .range([0, width]);
+
+    // Add Y axis
+    const y = d3.scaleLinear()
+        .domain([0, d3.max(groupData, d => d.value)])
+        .range([height, 0]);
+
+    // Add a scale for bubble size
+    const z = d3.scaleSqrt()
+        .domain([0, d3.max(groupData, d => d.value)])
+        .range([0, 40]);
+
+    // Add a scale for bubble color
+    const color = d3.scaleOrdinal(d3.schemeCategory10);
+
+    // Add bubbles
+    svg.append('g')
+        .selectAll('dot')
+        .data(groupData)
+        .enter()
+        .append('circle')
+        .attr('class', 'bubble')
+        .attr('cx', d => x(d.value))
+        .attr('cy', d => y(d.value))
+        .attr('r', d => z(d.value))
+        .style('fill', d => color(d.group))
+        .on('mouseover', function(event, d) {
+            d3.select(this).style('opacity', 0.7);
+            d3.select('#tooltip')
+                .style('opacity', 1)
+                .html(`
+                    <strong>Group:</strong> ${d.group}<br>
+                    <strong>Value:</strong> ${d.value}
+                `)
+                .style('left', `${event.pageX + 5}px`)
+                .style('top', `${event.pageY - 28}px`);
+        })
+        .on('mouseout', function() {
+            d3.select(this).style('opacity', 1);
+            d3.select('#tooltip').style('opacity', 0);
+        });
+
+    // Add labels
+    svg.selectAll('text')
+        .data(groupData)
+        .enter()
+        .append('text')
+        .attr('x', d => x(d.value))
+        .attr('y', d => y(d.value))
+        .attr('dy', '0.35em')
+        .attr('text-anchor', 'middle')
+        .text(d => `${d.group} ${d.value}%`);
 }
 
 // Change to the next slide
