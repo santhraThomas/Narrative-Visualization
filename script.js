@@ -69,25 +69,6 @@ function updateSlide(slideNumber) {
             break;
         case 4:
             // Slide 4: Race/Ethnicity of Students
-            container.html(`
-            <h1>Race/Ethnicity of Students</h1>
-            <div id="ethnicity-chart"></div>
-            <div id="group-select">
-                <label for="group">Select Group:</label>
-                <select id="group" style="font-size: 16px; padding: 5px;">
-                    <option value="Group A">Group A</option>
-                    <option value="Group B">Group B</option>
-                    <option value="Group C">Group C</option>
-                    <option value="Group D">Group D</option>
-                    <option value="Group E">Group E</option>
-                </select>
-            </div>
-        `);
-
-            document.getElementById('group').addEventListener('change', function() {
-                const selectedGroup = document.getElementById('group').value;
-                drawGroupTotalScores(studentData, selectedGroup);
-            });
 
             d3.select('#prev-slide').style('display', 'block');
             d3.select('#next-slide').style('display', 'none');
@@ -298,81 +279,6 @@ function updateTopPerformersTable(data, gender) {
         row.append('td').text(d['reading score']);
         row.append('td').text(d['writing score']);
     });
-}
-
-function drawGroupTotalScores(data, selectedGroup) {
-    const svgWidth = 800;
-    const svgHeight = 600;
-    const margin = { top: 20, right: 20, bottom: 70, left: 60 };
-    const width = svgWidth - margin.left - margin.right;
-    const height = svgHeight - margin.top - margin.bottom;
-
-    // Clear existing chart
-    d3.select('#ethnicity-chart').html('');
-
-    const svg = d3.select('#ethnicity-chart').append('svg')
-        .attr('width', svgWidth)
-        .attr('height', svgHeight)
-        .append('g')
-        .attr('transform', `translate(${margin.left},${margin.top})`);
-
-    // Process data
-    const groupData = data.filter(d => d['race/ethnicity'] === selectedGroup);
-    const totalScore = groupData.reduce((sum, d) => sum + ((parseFloat(d['math score']) + parseFloat(d['reading score']) + parseFloat(d['writing score'])) / 3), 0);
-
-    const groupScores = [{ group: selectedGroup, totalScore }];
-
-    const x = d3.scaleBand()
-        .domain(groupScores.map(d => d.group))
-        .range([0, width])
-        .padding(0.1);
-
-    const y = d3.scaleLinear()
-        .domain([0, d3.max(groupScores, d => d.totalScore)])
-        .nice()
-        .range([height, 0]);
-
-    // Define colors for each group
-    const colorMap = {
-        'Group A': 'blue',
-        'Group B': 'red',
-        'Group C': 'green',
-        'Group D': 'orange',
-        'Group E': 'purple'
-    };
-
-    svg.append('g')
-        .selectAll('.bar')
-        .data(groupScores)
-        .enter().append('rect')
-        .attr('class', 'bar')
-        .attr('x', d => x(d.group))
-        .attr('y', d => y(d.totalScore))
-        .attr('width', x.bandwidth())
-        .attr('height', d => height - y(d.totalScore))
-        .attr('fill', d => colorMap[d.group]);
-
-    svg.append('g')
-        .attr('class', 'x-axis')
-        .attr('transform', `translate(0,${height})`)
-        .call(d3.axisBottom(x))
-        .append('text')
-        .attr('class', 'axis-label')
-        .attr('x', width / 2)
-        .attr('y', 50)
-        .attr('fill', 'black')
-        .text('Race/Ethnicity');
-
-    svg.append('g')
-        .attr('class', 'y-axis')
-        .call(d3.axisLeft(y))
-        .append('text')
-        .attr('class', 'axis-label')
-        .attr('x', -height / 2)
-        .attr('y', -50)
-        .attr('transform', 'rotate(-90)')
-        .attr('fill', 'black')
-        .text('Total Student Scores');
 }
 
 // Change to the next slide
