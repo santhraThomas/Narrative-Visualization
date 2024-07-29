@@ -140,7 +140,7 @@ function drawBarChart(data, topN = 10) {
             d3.select('#tooltip')
                 .style('opacity', 1)
                 .html(`
-                    <strong>Student ID:</strong> ${d.details.index + 1}<br>
+                    <strong>Student ID:</strong> ${d.details['student id']}<br>
                     <strong>Gender:</strong> ${d.details.gender}<br>
                     <strong>Race/Ethnicity:</strong> ${d.details['race/ethnicity']}<br>
                     <strong>Math Score:</strong> ${d.details['math score']}<br>
