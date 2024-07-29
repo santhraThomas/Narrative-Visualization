@@ -1,4 +1,4 @@
-let currentSlide = 1; // Start at slide 2
+let currentSlide = 1; // Start at slide 1
 let studentData = []; // Store CSV data
 
 // Initialize slides
@@ -307,7 +307,7 @@ function drawGroupTotalScores(data, selectedGroup) {
         .attr('class', 'y-axis')
         .call(d3.axisLeft(y));
 }
-// Draw bar graph for Slide 4 based on ethnicity groups and total scores
+// Draw bar graph for Slide 4 based on ethnicity groups and total number of students
 function drawGroupTotalScores(data) {
     const svgWidth = 800;
     const svgHeight = 600;
@@ -325,30 +325,30 @@ function drawGroupTotalScores(data) {
 
     // Process data
     const ethnicityGroups = ['Group A', 'Group B', 'Group C', 'Group D', 'Group E'];
-    const groupScores = ethnicityGroups.map(group => {
+    const groupCounts = ethnicityGroups.map(group => {
         const groupData = data.filter(d => d['race/ethnicity'] === group);
-        const totalScore = groupData.reduce((sum, d) => sum + ((parseFloat(d['math score']) + parseFloat(d['reading score']) + parseFloat(d['writing score'])) / 3), 0);
-        return { group, totalScore };
+        const count = groupData.length;
+        return { group, count };
     });
 
     const x = d3.scaleLinear()
-        .domain([0, d3.max(groupScores, d => d.totalScore)])
+        .domain([0, d3.max(groupCounts, d => d.count)])
         .nice()
         .range([0, width]);
     
     const y = d3.scaleBand()
-        .domain(groupScores.map(d => d.group))
+        .domain(groupCounts.map(d => d.group))
         .range([0, height])
         .padding(0.1);
 
     svg.append('g')
         .selectAll('.bar')
-        .data(groupScores)
+        .data(groupCounts)
         .enter().append('rect')
         .attr('class', 'bar')
         .attr('x', 0)
         .attr('y', d => y(d.group))
-        .attr('width', d => x(d.totalScore))
+        .attr('width', d => x(d.count))
         .attr('height', y.bandwidth())
         .attr('fill', 'steelblue');
 
@@ -361,7 +361,7 @@ function drawGroupTotalScores(data) {
         .attr('x', width / 2)
         .attr('y', 50) // Adjusted position for label
         .attr('fill', 'black')
-        .text('Total Scores');
+        .text('Number of Students');
 
     svg.append('g')
         .attr('class', 'y-axis')
