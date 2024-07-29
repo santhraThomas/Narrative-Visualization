@@ -1,7 +1,7 @@
 // script.js
 
 // Global variables
-let currentSlide = 2; // Start at slide 2
+let currentSlide = 1; // Start at slide 2
 let studentData = []; // Store CSV data
 
 // Initialize slides
@@ -40,8 +40,10 @@ function updateSlide(slideNumber) {
             container.html(`
                 <h1>Top Student Performances</h1>
                 <div id="bar-chart"></div>
-                <input type="number" id="top-n" placeholder="Enter number" />
-                <button id="update-chart">Update</button>
+                <div id="controls">
+                    <input type="number" id="top-n" placeholder="Enter number" />
+                    <button id="update-chart">Update</button>
+                </div>
             `);
 
             // Add bar chart drawing logic here
@@ -96,7 +98,7 @@ function updateSlide(slideNumber) {
 function drawBarChart(data, topN = 10) {
     const svgWidth = 800;
     const svgHeight = 600; // Increased height for better space utilization
-    const margin = { top: 20, right: 20, bottom: 50, left: 60 }; // Adjusted margins for labels
+    const margin = { top: 20, right: 20, bottom: 70, left: 60 }; // Adjusted margins for labels
     const width = svgWidth - margin.left - margin.right;
     const height = svgHeight - margin.top - margin.bottom;
 
@@ -162,7 +164,7 @@ function drawBarChart(data, topN = 10) {
         .append('text')
         .attr('class', 'axis-label')
         .attr('x', width / 2)
-        .attr('y', 40) // Adjusted position for label
+        .attr('y', 50) // Adjusted position for label
         .attr('fill', 'black')
         .text('Student Id');
 
@@ -172,7 +174,7 @@ function drawBarChart(data, topN = 10) {
         .append('text')
         .attr('class', 'axis-label')
         .attr('x', -height / 2)
-        .attr('y', -40) // Adjusted position for label
+        .attr('y', -50) // Adjusted position for label
         .attr('transform', 'rotate(-90)')
         .attr('fill', 'black')
         .text('Total Student Scores');
