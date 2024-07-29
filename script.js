@@ -110,8 +110,8 @@ function drawBarChart(data, topN = 10) {
         .attr('transform', `translate(${margin.left},${margin.top})`);
 
     // Process data
-    const processedData = data.map(d => ({
-        id: d.index + 1, // Assuming you want to show ranking based on the index in the CSV
+    const processedData = data.map((d, index) => ({
+        id: d['student id'], // Correctly access the student id
         avgScore: (parseFloat(d['math score']) + parseFloat(d['reading score']) + parseFloat(d['writing score'])) / 3,
         details: d
     })).sort((a, b) => b.avgScore - a.avgScore).slice(0, topN);
