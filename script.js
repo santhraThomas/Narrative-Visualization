@@ -16,7 +16,7 @@ function initSlides() {
 function loadCSVData() {
     d3.csv("StudentsPerformance.csv").then((data) => {
         studentData = data;
-        updateSlide(1); // Update Slide 2 after loading data
+        updateSlide(2); // Update Slide 2 after loading data
     });
 }
 
@@ -67,7 +67,7 @@ function updateSlide(slideNumber) {
                 <div id="pie-chart"></div>
                 <div id="details-table"></div>
             `);
-            // Add pie chart drawing logic here
+            drawPieChart(studentData);
             d3.select('#prev-slide').style('display', 'block');
             d3.select('#next-slide').style('display', 'block');
             break;
@@ -179,6 +179,68 @@ function drawBarChart(data, topN = 10) {
         .attr('fill', 'black')
         .text('Total Student Scores');
 }
+
+// Draw pie chart for Slide 3
+function drawPieChart(data) {
+    const svgWidth = 800;
+    const svgHeight = 600;
+    const radius = Math.min(svgWidth, svgHeight) / 2;
+    const color = d3.scaleOrdinal().range(['#98abc5', '#8a89a6']);
+
+    const svg = d3.select('#pie-chart').append('svg')
+        .attr('width', svgWidth)
+        .attr('height', svgHeight)
+        .append('g')
+        .attr('transform', `translate(${svgWidth / 2},${svgHeight / 2})`);
+
+    // Process data
+    const passCounts = d3.rollups(data, v => v.length, d => d.gender === 'male' ? 'Male' : 'Female')
+        .map(([key, value]) => ({ gender: key, count: value }));
+
+    const pie = d3.pie().value(d => d.count)(passCounts);
+    const arc = d3.arc().outerRadius(radius - 10).innerRadius(0);
+    const labelArc = d3.arc().outerRadius(radius - 40).innerRadius(radius - 40);
+
+    const g = svg.selectAll('.arc')
+        .data(pie)
+        .enter().append('g')
+        .attr('class', 'arc')
+        .on('click', function(event, d) {
+            showTopPerformers(data, d.data.gender);
+        });
+
+    g.append('path')
+        .attr('d', arc)
+        .style('fill', d => color(d.data.gender));
+
+    g.append('text')
+        .attr('transform', d => `translate(${labelArc.centroid(d)})`)
+        .attr('dy', '.35em')
+        .text(d => `${d.data.gender}: ${d.data.count}`);
+}
+
+// Show top performers based on gender
+function showTopPerformers(data, gender) {
+    const topPerformers = data.filter(d => d.gender === gender)
+        .sort((a, b) => ((parseFloat(b['math score']) + parseFloat(b['reading score']) + parseFloat(b['writing score'])) / 3) -
+            ((parseFloat(a['math score']) + parseFloat(a['reading score']) + parseFloat(a['writing score'])) / 3))
+        .slice(0, 3);
+
+    const table = d3.select('#details-table');
+    table.html(''); // Clear the table
+
+    const rows = table.append('table').selectAll('tr')
+        .data(topPerformers)
+        .enter().append('tr');
+
+    rows.append('td').text(d => d['student id']);
+    rows.append('td').text(d => d.gender);
+    rows.append('td').text(d => d['race/ethnicity']);
+    rows.append('td').text(d => d['math score']);
+    rows.append('td').text(d => d['reading score']);
+    rows.append('td').text(d => d['writing score']);
+}
+
 
 // Change to the next slide
 function nextSlide() {
