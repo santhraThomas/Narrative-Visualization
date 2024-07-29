@@ -81,7 +81,7 @@ function updateSlide(slideNumber) {
             drawGroupTotalScores(studentData);
         
             d3.select('#prev-slide').style('display', 'block');
-            d3.select('#next-slide').style('display', 'block');
+            d3.select('#next-slide').style('display', 'none');
             break;
     }
 }
