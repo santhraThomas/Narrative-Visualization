@@ -64,14 +64,33 @@ function updateSlide(slideNumber) {
             });
             break;
         case 3:
-            // Slide 3: Male/Female Pass Ratio
+            // Slide 3: Male/Female Pass Ratio and Group Scores
             container.html(`
                 <h1>Male/Female Pass Ratio</h1>
                 <div id="pie-chart"></div>
+                <div id="bar-chart"></div>
                 <div id="details-table"></div>
+                <div id="group-select">
+                    <label for="group">Select Group:</label>
+                    <select id="group">
+                        <option value="Group A">Group A</option>
+                        <option value="Group B">Group B</option>
+                        <option value="Group C">Group C</option>
+                        <option value="Group D">Group D</option>
+                        <option value="Group E">Group E</option>
+                    </select>
+                </div>
             `);
             drawPieChart(studentData);
             drawTopPerformersTable(studentData);
+            drawGroupTotalScores(studentData, 'Group A'); // Initialize with default group
+
+            // Add event listener to the dropdown
+            document.getElementById('group').addEventListener('change', function() {
+                const selectedGroup = document.getElementById('group').value;
+                drawGroupTotalScores(studentData, selectedGroup);
+            });
+
             d3.select('#prev-slide').style('display', 'block');
             d3.select('#next-slide').style('display', 'block');
             break;
@@ -312,6 +331,59 @@ function updateTopPerformersTable(data, gender) {
     });
 }
 
+// Draw bar graph for Slide 3 based on selected group and total scores
+function drawGroupTotalScores(data, selectedGroup) {
+    const svgWidth = 800;
+    const svgHeight = 600;
+    const margin = { top: 20, right: 20, bottom: 70, left: 60 };
+    const width = svgWidth - margin.left - margin.right;
+    const height = svgHeight - margin.top - margin.bottom;
+
+    // Clear existing chart
+    d3.select('#bar-chart').html('');
+
+    const svg = d3.select('#bar-chart').append('svg')
+        .attr('width', svgWidth)
+        .attr('height', svgHeight)
+        .append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+
+    // Process data
+    const groupData = data.filter(d => d['race/ethnicity'] === selectedGroup);
+    const totalScore = groupData.reduce((sum, d) => sum + ((parseFloat(d['math score']) + parseFloat(d['reading score']) + parseFloat(d['writing score'])) / 3), 0);
+
+    const groupScores = [{ group: selectedGroup, totalScore }];
+
+    const x = d3.scaleBand()
+        .domain(groupScores.map(d => d.group))
+        .range([0, width])
+        .padding(0.1);
+
+    const y = d3.scaleLinear()
+        .domain([0, d3.max(groupScores, d => d.totalScore)])
+        .nice()
+        .range([height, 0]);
+
+    svg.append('g')
+        .selectAll('.bar')
+        .data(groupScores)
+        .enter().append('rect')
+        .attr('class', 'bar')
+        .attr('x', d => x(d.group))
+        .attr('y', d => y(d.totalScore))
+        .attr('width', x.bandwidth())
+        .attr('height', d => height - y(d.totalScore))
+        .attr('fill', 'steelblue');
+
+    svg.append('g')
+        .attr('class', 'x-axis')
+        .attr('transform', `translate(0,${height})`)
+        .call(d3.axisBottom(x));
+
+    svg.append('g')
+        .attr('class', 'y-axis')
+        .call(d3.axisLeft(y));
+}
 
 // Change to the next slide
 function nextSlide() {
