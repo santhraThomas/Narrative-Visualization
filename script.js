@@ -1,7 +1,5 @@
-// script.js
-
 // Global variables
-let currentSlide = 1; // Start at slide 2
+let currentSlide = 1; 
 let studentData = []; // Store CSV data
 
 // Initialize slides
@@ -41,18 +39,14 @@ function updateSlide(slideNumber) {
                 <h1>Top Student Performances</h1>
                 <div id="bar-chart"></div>
                 <div id="controls">
-                    <input type="number" id="top-n" placeholder="Update the Top number" />
-                    <button id="update-chart">Update</button>
+                    <input type="number" id="top-n" placeholder="Update the Top number" style="font-size: 16px; padding: 5px;" />
+                    <button id="update-chart" style="font-size: 16px; padding: 5px;">Update</button>
                 </div>
             `);
-
-            // Add bar chart drawing logic here
             drawBarChart(studentData);
 
             d3.select('#prev-slide').style('display', 'block');
             d3.select('#next-slide').style('display', 'block');
-
-            // Add event listener to the update button
             document.getElementById('update-chart').addEventListener('click', function() {
                 const topN = parseInt(document.getElementById('top-n').value);
                 if (!isNaN(topN) && topN > 0) {
@@ -80,7 +74,7 @@ function updateSlide(slideNumber) {
                 <div id="bar-chart"></div>
                 <div id="group-select">
                     <label for="group">Select Group:</label>
-                    <select id="group">
+                    <select id="group" style="font-size: 16px; padding: 5px;">
                         <option value="Group A">Group A</option>
                         <option value="Group B">Group B</option>
                         <option value="Group C">Group C</option>
@@ -90,32 +84,19 @@ function updateSlide(slideNumber) {
                 </div>
             `);
 
-            // Add event listener to the dropdown
             document.getElementById('group').addEventListener('change', function() {
                 const selectedGroup = document.getElementById('group').value;
                 drawGroupTotalScores(studentData, selectedGroup);
             });
 
             d3.select('#prev-slide').style('display', 'block');
-            d3.select('#next-slide').style('display', 'block');
-
-            // Initialize the chart with the default group
-            drawGroupTotalScores(studentData, 'Group A');
-            break;
-        case 5:
-            // Slide 5: Test Prep Course Effectiveness
-            container.html(`
-                <h1>Test Prep Course Effectiveness</h1>
-                <div id="prep-chart"></div>
-            `);
-            // Add bar chart drawing logic here
-            d3.select('#prev-slide').style('display', 'block');
             d3.select('#next-slide').style('display', 'none');
+
+            drawGroupTotalScores(studentData, 'Group A');
             break;
     }
 }
 
-// Draw bar chart for Slide 2
 function drawBarChart(data, topN = 10) {
     const svgWidth = 800;
     const svgHeight = 600; // Increased height for better space utilization
@@ -158,8 +139,9 @@ function drawBarChart(data, topN = 10) {
         .attr('y', d => y(d.avgScore))
         .attr('width', x.bandwidth())
         .attr('height', d => height - y(d.avgScore))
+        .attr('fill', 'darkblue') // Default color
         .on('mouseover', function(event, d) {
-            d3.select(this).style('fill', 'orange');
+            d3.select(this).style('fill', 'red'); // Color on hover
             d3.select('#tooltip')
                 .style('opacity', 1)
                 .html(`
@@ -174,7 +156,7 @@ function drawBarChart(data, topN = 10) {
                 .style('top', `${event.pageY - 28}px`);
         })
         .on('mouseout', function() {
-            d3.select(this).style('fill', 'steelblue');
+            d3.select(this).style('fill', 'darkblue'); // Default color on mouse out
             d3.select('#tooltip').style('opacity', 0);
         });
 
@@ -201,12 +183,13 @@ function drawBarChart(data, topN = 10) {
         .text('Total Student Scores');
 }
 
-// Draw pie chart for Slide 3
 function drawPieChart(data) {
     const svgWidth = 400;
     const svgHeight = 400;
     const radius = Math.min(svgWidth, svgHeight) / 2;
-    const color = d3.scaleOrdinal().range(['#98abc5', '#8a89a6']);
+    
+    // Color scale with blue for male and pink for female
+    const color = d3.scaleOrdinal().domain(['Male', 'Female']).range(['#0000FF', '#FFC0CB']); // Blue and Pink
 
     const svg = d3.select('#pie-chart').append('svg')
         .attr('width', svgWidth)
@@ -232,7 +215,13 @@ function drawPieChart(data) {
 
     g.append('path')
         .attr('d', arc)
-        .style('fill', d => color(d.data.gender));
+        .style('fill', d => color(d.data.gender))
+        .on('mouseover', function(event, d) {
+            d3.select(this).style('fill', d3.color(color(d.data.gender)).brighter(0.5)); // Lighter color on hover
+        })
+        .on('mouseout', function(event, d) {
+            d3.select(this).style('fill', color(d.data.gender)); // Revert to original color
+        });
 
     g.append('text')
         .attr('transform', d => `translate(${labelArc.centroid(d)})`)
@@ -310,7 +299,6 @@ function updateTopPerformersTable(data, gender) {
     });
 }
 
-// Draw bar graph for Slide 4 based on selected group and total scores
 function drawGroupTotalScores(data, selectedGroup) {
     const svgWidth = 800;
     const svgHeight = 600;
@@ -343,6 +331,15 @@ function drawGroupTotalScores(data, selectedGroup) {
         .nice()
         .range([height, 0]);
 
+    // Define colors for each group
+    const colorMap = {
+        'Group A': 'blue',
+        'Group B': 'red',
+        'Group C': 'green',
+        'Group D': 'orange',
+        'Group E': 'purple'
+    };
+
     svg.append('g')
         .selectAll('.bar')
         .data(groupScores)
@@ -352,21 +349,34 @@ function drawGroupTotalScores(data, selectedGroup) {
         .attr('y', d => y(d.totalScore))
         .attr('width', x.bandwidth())
         .attr('height', d => height - y(d.totalScore))
-        .attr('fill', 'steelblue');
+        .attr('fill', d => colorMap[d.group]);
 
     svg.append('g')
         .attr('class', 'x-axis')
         .attr('transform', `translate(0,${height})`)
-        .call(d3.axisBottom(x));
+        .call(d3.axisBottom(x).tickFormat(d => `#${d}`))
+        .append('text')
+        .attr('class', 'axis-label')
+        .attr('x', width / 2)
+        .attr('y', 50)
+        .attr('fill', 'black')
+        .text('Race/Ethnicity');
 
     svg.append('g')
         .attr('class', 'y-axis')
-        .call(d3.axisLeft(y));
+        .call(d3.axisLeft(y))
+        .append('text')
+        .attr('class', 'axis-label')
+        .attr('x', -height / 2)
+        .attr('y', -50) 
+        .attr('transform', 'rotate(-90)')
+        .attr('fill', 'black')
+        .text('Total Student Scores');
 }
 
 // Change to the next slide
 function nextSlide() {
-    if (currentSlide < 5) {
+    if (currentSlide < 4) {
         currentSlide++;
         updateSlide(currentSlide);
     }
