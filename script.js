@@ -1,7 +1,7 @@
 // script.js
 
 // Global variables
-let currentSlide = 2;
+let currentSlide = 1;
 let studentData = []; // Store CSV data
 
 // Initialize slides
