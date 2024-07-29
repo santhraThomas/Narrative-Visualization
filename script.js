@@ -1,6 +1,9 @@
 // script.js
 
 // Global variables
+// script.js
+
+// Global variables
 let currentSlide = 1; // Start at slide 2
 let studentData = []; // Store CSV data
 
@@ -68,6 +71,7 @@ function updateSlide(slideNumber) {
                 <div id="details-table"></div>
             `);
             drawPieChart(studentData);
+            drawTopPerformersTable(studentData);
             d3.select('#prev-slide').style('display', 'block');
             d3.select('#next-slide').style('display', 'block');
             break;
@@ -182,8 +186,8 @@ function drawBarChart(data, topN = 10) {
 
 // Draw pie chart for Slide 3
 function drawPieChart(data) {
-    const svgWidth = 800;
-    const svgHeight = 600;
+    const svgWidth = 400;
+    const svgHeight = 400;
     const radius = Math.min(svgWidth, svgHeight) / 2;
     const color = d3.scaleOrdinal().range(['#98abc5', '#8a89a6']);
 
@@ -206,7 +210,7 @@ function drawPieChart(data) {
         .enter().append('g')
         .attr('class', 'arc')
         .on('click', function(event, d) {
-            showTopPerformers(data, d.data.gender);
+            updateTopPerformersTable(data, d.data.gender);
         });
 
     g.append('path')
@@ -217,30 +221,77 @@ function drawPieChart(data) {
         .attr('transform', d => `translate(${labelArc.centroid(d)})`)
         .attr('dy', '.35em')
         .text(d => `${d.data.gender}: ${d.data.count}`);
+
+    // Initialize the table with top 3 male and top 3 female students
+    drawTopPerformersTable(data);
 }
 
-// Show top performers based on gender
-function showTopPerformers(data, gender) {
-    const topPerformers = data.filter(d => d.gender === gender)
-        .sort((a, b) => ((parseFloat(b['math score']) + parseFloat(b['reading score']) + parseFloat(b['writing score'])) / 3) -
-            ((parseFloat(a['math score']) + parseFloat(a['reading score']) + parseFloat(a['writing score'])) / 3))
-        .slice(0, 3);
+// Draw the top performers table
+function drawTopPerformersTable(data) {
+    const topPerformers = getTopPerformers(data);
 
     const table = d3.select('#details-table');
     table.html(''); // Clear the table
 
-    const rows = table.append('table').selectAll('tr')
-        .data(topPerformers)
-        .enter().append('tr');
+    const thead = table.append('table').append('thead').append('tr');
+    thead.append('th').text('Student ID');
+    thead.append('th').text('Gender');
+    thead.append('th').text('Race/Ethnicity');
+    thead.append('th').text('Math Score');
+    thead.append('th').text('Reading Score');
+    thead.append('th').text('Writing Score');
 
-    rows.append('td').text(d => d['student id']);
-    rows.append('td').text(d => d.gender);
-    rows.append('td').text(d => d['race/ethnicity']);
-    rows.append('td').text(d => d['math score']);
-    rows.append('td').text(d => d['reading score']);
-    rows.append('td').text(d => d['writing score']);
+    const tbody = table.select('table').append('tbody');
+
+    topPerformers.forEach(d => {
+        const row = tbody.append('tr');
+        row.append('td').text(d['student id']);
+        row.append('td').text(d.gender);
+        row.append('td').text(d['race/ethnicity']);
+        row.append('td').text(d['math score']);
+        row.append('td').text(d['reading score']);
+        row.append('td').text(d['writing score']);
+    });
 }
 
+// Get the top 3 male and top 3 female students
+function getTopPerformers(data) {
+    const sortedData = data.sort((a, b) => ((parseFloat(b['math score']) + parseFloat(b['reading score']) + parseFloat(b['writing score'])) / 3) -
+        ((parseFloat(a['math score']) + parseFloat(a['reading score']) + parseFloat(a['writing score'])) / 3));
+
+    const topMales = sortedData.filter(d => d.gender === 'male').slice(0, 3);
+    const topFemales = sortedData.filter(d => d.gender === 'female').slice(0, 3);
+
+    return [...topMales, ...topFemales];
+}
+
+// Update the top performers table based on gender
+function updateTopPerformersTable(data, gender) {
+    const topPerformers = getTopPerformers(data.filter(d => d.gender.toLowerCase() === gender.toLowerCase()));
+
+    const table = d3.select('#details-table');
+    table.html(''); // Clear the table
+
+    const thead = table.append('table').append('thead').append('tr');
+    thead.append('th').text('Student ID');
+    thead.append('th').text('Gender');
+    thead.append('th').text('Race/Ethnicity');
+    thead.append('th').text('Math Score');
+    thead.append('th').text('Reading Score');
+    thead.append('th').text('Writing Score');
+
+    const tbody = table.select('table').append('tbody');
+
+    topPerformers.forEach(d => {
+        const row = tbody.append('tr');
+        row.append('td').text(d['student id']);
+        row.append('td').text(d.gender);
+        row.append('td').text(d['race/ethnicity']);
+        row.append('td').text(d['math score']);
+        row.append('td').text(d['reading score']);
+        row.append('td').text(d['writing score']);
+    });
+}
 
 // Change to the next slide
 function nextSlide() {
