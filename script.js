@@ -97,12 +97,15 @@ function updateSlide(slideNumber) {
     }
 }
 
-function drawBarChart(data) {
+function drawBarChart(data, topN = 10) {
     const svgWidth = 800;
-    const svgHeight = 400;
-    const margin = { top: 50, right: 30, bottom: 70, left: 60 };
+    const svgHeight = 400; // Increased height for better space utilization
+    const margin = { top: 20, right: 20, bottom: 70, left: 60 }; // Adjusted margins for labels
     const width = svgWidth - margin.left - margin.right;
     const height = svgHeight - margin.top - margin.bottom;
+
+    // Clear existing chart
+    d3.select('#bar-chart').html('');
 
     const svg = d3.select('#bar-chart').append('svg')
         .attr('width', svgWidth)
@@ -110,50 +113,76 @@ function drawBarChart(data) {
         .append('g')
         .attr('transform', `translate(${margin.left},${margin.top})`);
 
+    // Process data
+    const processedData = data.map((d, index) => ({
+        id: d['student id'], // Use the student id directly from CSV
+        avgScore: (parseFloat(d['math score']) + parseFloat(d['reading score']) + parseFloat(d['writing score'])) / 3,
+        details: d
+    })).sort((a, b) => b.avgScore - a.avgScore).slice(0, topN);
+
     const x = d3.scaleBand()
+        .domain(processedData.map(d => d.id))
         .range([0, width])
         .padding(0.1);
+
     const y = d3.scaleLinear()
+        .domain([0, d3.max(processedData, d => d.avgScore)])
+        .nice()
         .range([height, 0]);
 
-    x.domain(data.map(d => d.id));
-    y.domain([0, d3.max(data, d => d.totalScore)]);
-
-    svg.selectAll('.bar')
-        .data(data)
+    svg.append('g')
+        .selectAll('.bar')
+        .data(processedData)
         .enter().append('rect')
         .attr('class', 'bar')
         .attr('x', d => x(d.id))
+        .attr('y', d => y(d.avgScore))
         .attr('width', x.bandwidth())
-        .attr('y', d => y(d.totalScore))
-        .attr('height', d => height - y(d.totalScore))
-        .attr('fill', 'blue');
+        .attr('height', d => height - y(d.avgScore))
+        .attr('fill', 'darkblue') // Default color
+        .on('mouseover', function(event, d) {
+            d3.select(this).style('fill', 'red'); // Color on hover
+            d3.select('#tooltip')
+                .style('opacity', 1)
+                .html(`
+                    <strong>Student ID:</strong> ${d.details['student id']}<br>
+                    <strong>Gender:</strong> ${d.details.gender}<br>
+                    <strong>Race/Ethnicity:</strong> ${d.details['race/ethnicity']}<br>
+                    <strong>Math Score:</strong> ${d.details['math score']}<br>
+                    <strong>Reading Score:</strong> ${d.details['reading score']}<br>
+                    <strong>Writing Score:</strong> ${d.details['writing score']}
+                `)
+                .style('left', `${event.pageX + 5}px`)
+                .style('top', `${event.pageY - 28}px`);
+        })
+        .on('mouseout', function() {
+            d3.select(this).style('fill', 'darkblue'); // Default color on mouse out
+            d3.select('#tooltip').style('opacity', 0);
+        });
 
     svg.append('g')
+        .attr('class', 'x-axis')
         .attr('transform', `translate(0,${height})`)
-        .call(d3.axisBottom(x))
-        .selectAll('text')
-        .attr('transform', 'rotate(-45)')
-        .style('text-anchor', 'end');
+        .call(d3.axisBottom(x).tickFormat(d => `#${d}`))
+        .append('text')
+        .attr('class', 'axis-label')
+        .attr('x', width / 2)
+        .attr('y', 50) // Adjusted position for label
+        .attr('fill', 'black')
+        .text('Student Id')
+        .style('font-size', '16px');
 
     svg.append('g')
-        .call(d3.axisLeft(y));
-
-    svg.append('text')
-        .attr('text-anchor', 'middle')
-        .attr('transform', `translate(-40,${height / 2})rotate(-90)`)
-        .text('Total Student Scores');
-
-    svg.append('text')
-        .attr('text-anchor', 'middle')
-        .attr('transform', `translate(${width / 2},${height + margin.bottom - 10})`)
-        .text('Student Id');
-
-    // Position the input field and button
-    d3.select('#input-container')
-        .style('position', 'absolute')
-        .style('left', `${margin.left}px`)
-        .style('top', `${svgHeight + 10}px`);
+        .attr('class', 'y-axis')
+        .call(d3.axisLeft(y))
+        .append('text')
+        .attr('class', 'axis-label')
+        .attr('x', -height / 2)
+        .attr('y', -50) // Adjusted position for label
+        .attr('transform', 'rotate(-90)')
+        .attr('fill', 'black')
+        .text('Total Student Scores')
+        .style('font-size', '16px');
 }
 
 function drawPieChart(data) {
