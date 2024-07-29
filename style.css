@@ -61,6 +61,27 @@ input {
     font-size: 16px;
 }
 
-#bar-chart, #pie-chart, #ethnicity-chart, #prep-chart {
+#pie-chart, #ethnicity-chart, #prep-chart {
     height: 400px;
+}
+
+#chart-container {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+#bar-chart {
+    flex: 1;
+}
+
+#controls {
+    margin-left: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+#controls input {
+    margin-bottom: 10px;
 }
