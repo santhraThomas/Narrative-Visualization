@@ -37,7 +37,7 @@ function updateSlide(slideNumber) {
                 <h1>Top Student Performances</h1>
                 <div id="bar-chart"></div>
                 <div id="controls">
-                    <input type="number" id="top-n" placeholder="Update the Top number" />
+                    <input type="number" id="top-n" placeholder="Update to Top" />
                     <button id="update-chart">Update</button>
                 </div>
             `);
