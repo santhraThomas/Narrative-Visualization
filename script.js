@@ -96,8 +96,8 @@ function updateSlide(slideNumber) {
 // Draw bar chart for Slide 2
 function drawBarChart(data, topN = 10) {
     const svgWidth = 800;
-    const svgHeight = 400;
-    const margin = { top: 20, right: 20, bottom: 30, left: 40 };
+    const svgHeight = 600;
+    const margin = { top: 20, right: 20, bottom: 50, left: 60 };
     const width = svgWidth - margin.left - margin.right;
     const height = svgHeight - margin.top - margin.bottom;
 
@@ -159,11 +159,24 @@ function drawBarChart(data, topN = 10) {
     svg.append('g')
         .attr('class', 'x-axis')
         .attr('transform', `translate(0,${height})`)
-        .call(d3.axisBottom(x).tickFormat(d => `#${d}`));
+        .call(d3.axisBottom(x).tickFormat(d => `#${d}`))
+        .append('text')
+        .attr('class', 'axis-label')
+        .attr('x', width / 2)
+        .attr('y', 40) // Adjusted position for label
+        .attr('fill', 'black')
+        .text('Student Id');
 
     svg.append('g')
         .attr('class', 'y-axis')
-        .call(d3.axisLeft(y));
+        .call(d3.axisLeft(y))
+        .append('text')
+        .attr('class', 'axis-label')
+        .attr('x', -height / 2)
+        .attr('y', -40) // Adjusted position for label
+        .attr('transform', 'rotate(-90)')
+        .attr('fill', 'black')
+        .text('Total Student Scores');
 }
 
 // Change to the next slide
