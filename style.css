@@ -72,14 +72,20 @@ input {
 }
 
 #controls {
-    margin-left: 20px;
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    align-items: center; /* Align items vertically in the center */
+    gap: 10px; /* Space between text field and button */
 }
 
 #controls input {
-    margin-bottom: 10px;
+    padding: 5px;
+    font-size: 16px;
+}
+
+#controls button {
+    padding: 5px 10px;
+    font-size: 16px;
+    cursor: pointer;
 }
 /* Style for x-axis labels */
 .x-axis .tick text {
