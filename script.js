@@ -71,32 +71,17 @@ function updateSlide(slideNumber) {
             break;
         case 4:
             // Slide 4: Race/Ethnicity of Students
+            // Slide 4: Race/Ethnicity of Students
             container.html(`
                 <h1>Race/Ethnicity of Students</h1>
-                <div id="bar-chart"></div>
-                <div id="group-select">
-                    <label for="group">Select Group:</label>
-                    <select id="group">
-                        <option value="Group A">Group A</option>
-                        <option value="Group B">Group B</option>
-                        <option value="Group C">Group C</option>
-                        <option value="Group D">Group D</option>
-                        <option value="Group E">Group E</option>
-                    </select>
-                </div>
+                <div id="ethnicity-chart"></div>
             `);
-
-            // Add event listener to the dropdown
-            document.getElementById('group').addEventListener('change', function() {
-                const selectedGroup = document.getElementById('group').value;
-                drawGroupTotalScores(studentData, selectedGroup);
-            });
-
+        
+            // Initialize the chart
+            drawGroupTotalScores(studentData);
+        
             d3.select('#prev-slide').style('display', 'block');
             d3.select('#next-slide').style('display', 'block');
-
-            // Initialize the chart with the default group
-            drawGroupTotalScores(studentData, 'Group A');
             break;
     }
 }
@@ -321,6 +306,73 @@ function drawGroupTotalScores(data, selectedGroup) {
     svg.append('g')
         .attr('class', 'y-axis')
         .call(d3.axisLeft(y));
+}
+// Draw bar graph for Slide 4 based on ethnicity groups and total scores
+function drawGroupTotalScores(data) {
+    const svgWidth = 800;
+    const svgHeight = 600;
+    const margin = { top: 20, right: 20, bottom: 70, left: 60 };
+    const width = svgWidth - margin.left - margin.right;
+    const height = svgHeight - margin.top - margin.bottom;
+
+    // Clear existing chart
+    d3.select('#ethnicity-chart').html('');
+    const svg = d3.select('#ethnicity-chart').append('svg')
+        .attr('width', svgWidth)
+        .attr('height', svgHeight)
+        .append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+
+    // Process data
+    const ethnicityGroups = ['Group A', 'Group B', 'Group C', 'Group D', 'Group E'];
+    const groupScores = ethnicityGroups.map(group => {
+        const groupData = data.filter(d => d['race/ethnicity'] === group);
+        const totalScore = groupData.reduce((sum, d) => sum + ((parseFloat(d['math score']) + parseFloat(d['reading score']) + parseFloat(d['writing score'])) / 3), 0);
+        return { group, totalScore };
+    });
+
+    const x = d3.scaleLinear()
+        .domain([0, d3.max(groupScores, d => d.totalScore)])
+        .nice()
+        .range([0, width]);
+    
+    const y = d3.scaleBand()
+        .domain(groupScores.map(d => d.group))
+        .range([0, height])
+        .padding(0.1);
+
+    svg.append('g')
+        .selectAll('.bar')
+        .data(groupScores)
+        .enter().append('rect')
+        .attr('class', 'bar')
+        .attr('x', 0)
+        .attr('y', d => y(d.group))
+        .attr('width', d => x(d.totalScore))
+        .attr('height', y.bandwidth())
+        .attr('fill', 'steelblue');
+
+    svg.append('g')
+        .attr('class', 'x-axis')
+        .attr('transform', `translate(0,${height})`)
+        .call(d3.axisBottom(x))
+        .append('text')
+        .attr('class', 'axis-label')
+        .attr('x', width / 2)
+        .attr('y', 50) // Adjusted position for label
+        .attr('fill', 'black')
+        .text('Total Scores');
+
+    svg.append('g')
+        .attr('class', 'y-axis')
+        .call(d3.axisLeft(y))
+        .append('text')
+        .attr('class', 'axis-label')
+        .attr('x', -height / 2)
+        .attr('y', -50) // Adjusted position for label
+        .attr('transform', 'rotate(-90)')
+        .attr('fill', 'black')
+        .text('Race/Ethnicity');
 }
 
 // Change to the next slide
