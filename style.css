@@ -102,11 +102,13 @@ input {
 .tooltip {
     position: absolute;
     text-align: center;
-    padding: 5px;
+    padding: 8px;
     font: 12px sans-serif;
-    background: lightsteelblue;
-    border-radius: 5px;
+    background: rgba(0, 0, 0, 0.7); /* Dark semi-transparent background */
+    color: white; /* Text color for better readability */
+    border-radius: 4px;
     pointer-events: none;
     white-space: nowrap;
 }
+
 
