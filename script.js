@@ -327,7 +327,7 @@ function drawGroupTotalScores(data, selectedGroup) {
 function drawGroupTotalScores(data, selectedGroup = null) {
     const svgWidth = 800;
     const svgHeight = 600;
-    const margin = { top: 20, right: 20, bottom: 70, left: 100 };
+    const margin = { top: 20, right: 20, bottom: 70, left: 150 };
     const width = svgWidth - margin.left - margin.right;
     const height = svgHeight - margin.top - margin.bottom;
 
