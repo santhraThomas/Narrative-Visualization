@@ -83,8 +83,7 @@ function updateSlide(slideNumber) {
             d3.select('#prev-slide').style('display', 'block');
             d3.select('#next-slide').style('display', 'none');
             // Initialize the table with top 3 students from each group
-            updateTopStudentsTable(studentData, 'group A'); // Default to group A or any group
-            drawGroupTotalScores(studentData);
+            updateTopStudentsTable(studentData, selectedGroup);
             break;
     }
 }
@@ -310,6 +309,7 @@ function drawGroupTotalScores(data, selectedGroup) {
         .attr('class', 'y-axis')
         .call(d3.axisLeft(y));
 }
+// Draw bar graph for Slide 4 based on selected group and total scores
 function drawGroupTotalScores(data, selectedGroup = null) {
     const svgWidth = 800;
     const svgHeight = 600;
@@ -354,9 +354,9 @@ function drawGroupTotalScores(data, selectedGroup = null) {
         .attr('height', y.bandwidth())
         .attr('fill', 'steelblue')
         .on('click', function(event, d) {
-            if (selectedGroup === null) { // Only update if no specific group is selected
+            if (selectedGroup === null || selectedGroup !== d.group) {
                 updateTopStudentsTable(data, d.group);
-                drawGroupTotalScores(data, d.group);
+                drawGroupTotalScores(data, d.group); // Make sure to update the chart with the new group
             }
         });
 
@@ -385,7 +385,12 @@ function drawGroupTotalScores(data, selectedGroup = null) {
 
 // Update the top students table based on selected group
 function updateTopStudentsTable(data, group) {
-    const topStudents = getTopStudents(data, group);
+    // Directly filter and sort the data without using getTopStudents
+    const groupData = data.filter(d => d['race/ethnicity'] === group);
+    const sortedData = groupData.sort((a, b) => ((parseFloat(b['math score']) + parseFloat(b['reading score']) + parseFloat(b['writing score'])) / 3) -
+        ((parseFloat(a['math score']) + parseFloat(a['reading score']) + parseFloat(a['writing score'])) / 3));
+    const topStudents = sortedData.slice(0, 3);
+
     const table = d3.select('#details-table');
     table.html(''); // Clear the table
     const thead = table.append('table').append('thead').append('tr');
@@ -405,14 +410,6 @@ function updateTopStudentsTable(data, group) {
         row.append('td').text(d['reading score']);
         row.append('td').text(d['writing score']);
     });
-}
-
-// Get the top 3 students for a given group
-function getTopStudents(data, group) {
-    const groupData = data.filter(d => d['race/ethnicity'] === group);
-    const sortedData = groupData.sort((a, b) => ((parseFloat(b['math score']) + parseFloat(b['reading score']) + parseFloat(b['writing score'])) / 3) -
-        ((parseFloat(a['math score']) + parseFloat(a['reading score']) + parseFloat(a['writing score'])) / 3));
-    return sortedData.slice(0, 3);
 }
 
 
