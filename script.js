@@ -16,7 +16,7 @@ function initSlides() {
 function loadCSVData() {
     d3.csv("StudentsPerformance.csv").then((data) => {
         studentData = data;
-        updateSlide(2); // Update Slide 2 after loading data
+        updateSlide(1); // Update Slide 2 after loading data
     });
 }
 
