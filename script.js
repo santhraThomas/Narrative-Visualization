@@ -71,10 +71,10 @@ function updateSlide(slideNumber) {
             break;
         case 4:
             // Slide 4: Race/Ethnicity of Students
-            // Slide 4: Race/Ethnicity of Students
             container.html(`
                 <h1>Race/Ethnicity of Students</h1>
                 <div id="ethnicity-chart"></div>
+                <div id="details-table"></div> <!-- Added table for top students -->
             `);
         
             // Initialize the chart
@@ -82,6 +82,9 @@ function updateSlide(slideNumber) {
         
             d3.select('#prev-slide').style('display', 'block');
             d3.select('#next-slide').style('display', 'none');
+            // Initialize the table with top 3 students from each group
+            updateTopStudentsTable(studentData, 'group A'); // Default to group A or any group
+            drawGroupTotalScores(studentData);
             break;
     }
 }
@@ -307,8 +310,7 @@ function drawGroupTotalScores(data, selectedGroup) {
         .attr('class', 'y-axis')
         .call(d3.axisLeft(y));
 }
-// Draw bar graph for Slide 4 based on ethnicity groups and total number of students
-function drawGroupTotalScores(data) {
+function drawGroupTotalScores(data, selectedGroup = null) {
     const svgWidth = 800;
     const svgHeight = 600;
     const margin = { top: 20, right: 20, bottom: 70, left: 60 };
@@ -350,7 +352,13 @@ function drawGroupTotalScores(data) {
         .attr('y', d => y(d.group))
         .attr('width', d => x(d.count))
         .attr('height', y.bandwidth())
-        .attr('fill', 'steelblue');
+        .attr('fill', 'steelblue')
+        .on('click', function(event, d) {
+            if (selectedGroup === null) { // Only update if no specific group is selected
+                updateTopStudentsTable(data, d.group);
+                drawGroupTotalScores(data, d.group);
+            }
+        });
 
     svg.append('g')
         .attr('class', 'x-axis')
@@ -359,7 +367,7 @@ function drawGroupTotalScores(data) {
         .append('text')
         .attr('class', 'axis-label')
         .attr('x', width / 2)
-        .attr('y', 50) // Adjusted position for label
+        .attr('y', 50)
         .attr('fill', 'black')
         .text('Number of Students');
 
@@ -369,11 +377,44 @@ function drawGroupTotalScores(data) {
         .append('text')
         .attr('class', 'axis-label')
         .attr('x', -height / 2)
-        .attr('y', -50) // Adjusted position for label
+        .attr('y', -50)
         .attr('transform', 'rotate(-90)')
         .attr('fill', 'black')
         .text('Race/Ethnicity');
 }
+
+// Update the top students table based on selected group
+function updateTopStudentsTable(data, group) {
+    const topStudents = getTopStudents(data, group);
+    const table = d3.select('#details-table');
+    table.html(''); // Clear the table
+    const thead = table.append('table').append('thead').append('tr');
+    thead.append('th').text('Student ID');
+    thead.append('th').text('Gender');
+    thead.append('th').text('Race/Ethnicity');
+    thead.append('th').text('Math Score');
+    thead.append('th').text('Reading Score');
+    thead.append('th').text('Writing Score');
+    const tbody = table.select('table').append('tbody');
+    topStudents.forEach(d => {
+        const row = tbody.append('tr');
+        row.append('td').text(d['student id']);
+        row.append('td').text(d.gender);
+        row.append('td').text(d['race/ethnicity']);
+        row.append('td').text(d['math score']);
+        row.append('td').text(d['reading score']);
+        row.append('td').text(d['writing score']);
+    });
+}
+
+// Get the top 3 students for a given group
+function getTopStudents(data, group) {
+    const groupData = data.filter(d => d['race/ethnicity'] === group);
+    const sortedData = groupData.sort((a, b) => ((parseFloat(b['math score']) + parseFloat(b['reading score']) + parseFloat(b['writing score'])) / 3) -
+        ((parseFloat(a['math score']) + parseFloat(a['reading score']) + parseFloat(a['writing score'])) / 3));
+    return sortedData.slice(0, 3);
+}
+
 
 // Change to the next slide
 function nextSlide() {
