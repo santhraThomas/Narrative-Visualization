@@ -8,6 +8,7 @@ function initSlides() {
     document.getElementById('prev-slide').addEventListener('click', prevSlide);
     loadCSVData(); // Load CSV data on initialization
 }
+
 // Load and parse CSV data
 function loadCSVData() {
     d3.csv("StudentsPerformance.csv").then((data) => {
@@ -15,6 +16,7 @@ function loadCSVData() {
         updateSlide(2); // Update Slide 2 after loading data
     });
 }
+
 // Update slide content
 function updateSlide(slideNumber) {
     const container = d3.select('#visualization-container');
@@ -95,16 +97,6 @@ function updateSlide(slideNumber) {
 
             // Initialize the chart with the default group
             drawGroupTotalScores(studentData, 'Group A');
-            break;
-        case 5:
-            // Slide 5: Test Prep Course Effectiveness
-            container.html(`
-                <h1>Test Prep Course Effectiveness</h1>
-                <div id="prep-chart"></div>
-            `);
-            // Add bar chart drawing logic here
-            d3.select('#prev-slide').style('display', 'block');
-            d3.select('#next-slide').style('display', 'none');
             break;
     }
 }
@@ -188,7 +180,6 @@ function drawBarChart(data, topN = 10) {
         .text('Total Student Scores');
 }
 
-// Draw pie chart for Slide 3
 function drawPieChart(data) {
     const svgWidth = 400;
     const svgHeight = 400;
@@ -206,7 +197,7 @@ function drawPieChart(data) {
     const pie = d3.pie().value(d => d.count)(passCounts);
     const arc = d3.arc().outerRadius(radius - 10).innerRadius(0);
     const labelArc = d3.arc().outerRadius(radius - 40).innerRadius(radius - 40);
-    const g = svg.selectAll('.arc')
+        const g = svg.selectAll('.arc')
         .data(pie)
         .enter().append('g')
         .attr('class', 'arc')
@@ -222,9 +213,11 @@ function drawPieChart(data) {
         .attr('transform', d => `translate(${labelArc.centroid(d)})`)
         .attr('dy', '.35em')
         .text(d => `${d.data.gender}: ${d.data.count}`);
+    
     // Initialize the table with top 3 male and top 3 female students
     drawTopPerformersTable(data);
 }
+
 // Draw the top performers table
 function drawTopPerformersTable(data) {
     const topPerformers = getTopPerformers(data);
@@ -248,6 +241,7 @@ function drawTopPerformersTable(data) {
         row.append('td').text(d['writing score']);
     });
 }
+
 // Get the top 3 male and top 3 female students
 function getTopPerformers(data) {
     const sortedData = data.sort((a, b) => ((parseFloat(b['math score']) + parseFloat(b['reading score']) + parseFloat(b['writing score'])) / 3) -
@@ -256,6 +250,7 @@ function getTopPerformers(data) {
     const topFemales = sortedData.filter(d => d.gender === 'female').slice(0, 3);
     return [...topMales, ...topFemales];
 }
+
 // Update the top performers table based on gender
 function updateTopPerformersTable(data, gender) {
     const topPerformers = getTopPerformers(data.filter(d => d.gender.toLowerCase() === gender.toLowerCase()));
@@ -330,11 +325,12 @@ function drawGroupTotalScores(data, selectedGroup) {
 
 // Change to the next slide
 function nextSlide() {
-    if (currentSlide < 5) {
+    if (currentSlide < 4) {
         currentSlide++;
         updateSlide(currentSlide);
     }
 }
+
 // Change to the previous slide
 function prevSlide() {
     if (currentSlide > 1) {
@@ -342,5 +338,6 @@ function prevSlide() {
         updateSlide(currentSlide);
     }
 }
+
 // Initialize the slides
 initSlides();
