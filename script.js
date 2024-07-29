@@ -293,6 +293,7 @@ function updateTopPerformersTable(data, gender) {
     });
 }
 
+
 // Change to the next slide
 function nextSlide() {
     if (currentSlide < 5) {
